@@ -24,6 +24,7 @@ module.exports = {
       },
      {
       test: /\.(png|jpg|gif)$/i,
+      dependency: { not: ['url'] },
         use: [
           {
             loader: 'url-loader',
@@ -32,6 +33,7 @@ module.exports = {
             },
           },
         ],
+        type: 'javascript/auto',
       },
       {
         test: /\.js$/,
