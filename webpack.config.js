@@ -11,25 +11,20 @@ module.exports = {
     port: 3000,
   },
   entry: './src/index.js',
-  mode: 'production',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'app.bundle.js',
   },
   module: {
     rules: [
-    {
-      test: /\.(png|jpg|gif)$/i,
-      dependency: { not: ['url'] },
+      {
+        test: /\.(png|jpg|gif)$/i,
+        dependency: { not: ['url'] },
         use: [
           {
             loader: 'url-loader',
-            options: {
-              limit: 8192,
-            },
           },
         ],
-        type: 'javascript/auto',
       },
       {
         test: /\.js$/,
@@ -47,7 +42,7 @@ module.exports = {
         ],
       },
       {
-        test: /\.css$/,
+        test: /\.css$/i,
         use: [
           MiniCssExtractPlugin.loader, 'css-loader',
         ],
@@ -64,7 +59,6 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: '[name].css',
       chunkFilename: '[id].css',
-      linkType: "text/css",
     }),
   ],
 };
