@@ -10,22 +10,11 @@ module.exports = {
     compress: true,
     port: 3000,
   },
-  entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'app.bundle.js',
   },
   module: {
     rules: [
-      {
-        test: /\.(png|jpg|gif)$/i,
-        dependency: { not: ['url'] },
-        use: [
-          {
-            loader: 'url-loader',
-          },
-        ],
-      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -42,17 +31,27 @@ module.exports = {
         ],
       },
       {
-        test: /\.css$/i,
+        test: /\.css$/,
         use: [
           MiniCssExtractPlugin.loader, 'css-loader',
+        ],
+      },
+      {
+        test: /\.(png|jpg|gif)$/i,
+        dependency: { not: ['url'] },
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 8192,
+            },
+          },
         ],
       },
     ],
   },
   plugins: [
     new HtmlWebPackPlugin({
-      inject: false,
-      hash: true,
       template: './src/index.html',
       filename: './index.html',
     }),
