@@ -1,5 +1,6 @@
 import { calcHealthLevel, calcTileType } from './utils.js';
 
+
 export default class GamePlay {
   constructor() {
     this.boardSize = 8;
@@ -77,6 +78,7 @@ export default class GamePlay {
       const cellEl = this.boardEl.children[position.position];
       const charEl = document.createElement('div');
       charEl.classList.add('character', position.character.type);
+      console.log('хочу видеть тип', position.character.type);
 
       const healthEl = document.createElement('div');
       healthEl.classList.add('health-level');

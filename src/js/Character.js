@@ -1,11 +1,11 @@
 export default class Character {
   static TYPES = {
-    Bowman: [25, 25],
-    Swordsman: [40, 10],
-    Magician: [10, 40],
-    Daemon: [10, 40],
-    Undead: [40, 10],
-    Vampire: [25, 25],
+    bowman: [25, 25],
+    swordsman: [40, 10],
+    magician: [10, 40],
+    daemon: [10, 40],
+    undead: [40, 10],
+    vampire: [25, 25],
   }
 
   constructor(level, type = 'generic') {
