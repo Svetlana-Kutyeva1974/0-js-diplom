@@ -2,8 +2,7 @@ import { generateTeam, getRandomInt } from './generators.js';
 import Bowman from './Bowman.js';
 import Swordsman from './Swordsman.js';
 import PositionedCharacter from './PositionedCharacter.js';
-
-
+/*
 const characterType = {
   Bowman: 'bowman',
   Swordsman: 'swordsman',
@@ -12,7 +11,7 @@ const characterType = {
   Daemon: 'daemon',
   Vampire: 'vampire',
 };
-
+*/
 export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
@@ -52,11 +51,11 @@ export default class GameController {
 
     for (const num of res) {
     */
-      /*
+    /*
       const characterValue = res.members[Symbol.iterator]().next().value;
       console.log('плэй генератор', num, characterValue, characterType[characterValue]);
       */
-     /*
+    /*
       let position = getRandomInt(7);
       if (position === ArrayOfPositionCharacter.includes(position)) {
         position = getRandomInt(7);
