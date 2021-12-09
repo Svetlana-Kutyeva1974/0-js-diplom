@@ -1,17 +1,8 @@
-import { generateTeam, getRandomInt } from './generators.js';
+import { generateTeam, getRandomInt, generateArray } from './generators.js';
 import Bowman from './Bowman.js';
 import Swordsman from './Swordsman.js';
 import PositionedCharacter from './PositionedCharacter.js';
-/*
-const characterType = {
-  Bowman: 'bowman',
-  Swordsman: 'swordsman',
-  Undead: 'undead',
-  Magician: 'magician',
-  Daemon: 'daemon',
-  Vampire: 'vampire',
-};
-*/
+
 export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
@@ -19,58 +10,57 @@ export default class GameController {
   }
 
   initGameDraw() {
-    const res = generateTeam([Bowman, Swordsman], 1, 4);
+    const size = this.gamePlay.boardSize;
+    const min = 0;
+    const max = size ** 2;
+    const arrayForUser = generateArray(min, max - size + 1, size);
+    console.log('получили массив юзера', arrayForUser);
+    /*
+    const arrayForUser = generateArray(min, max - size, size);
+    arrayForUser.concat(generateArray(min + 1, max, size));
+    */
+    const arrayForComputer = generateArray(min + size - 2, max - 1, size);
+    console.log('получили массив компа', arrayForComputer);
+    /*
+    const arrayForComputer = generateArray(min + size - 2, max - 2, size);
+    arrayForUser.concat(generateArray(min + size - 1, max - 1, size));
+    */
+    const team = generateTeam([Bowman, Swordsman], 1, 4);
     const ArrayOfPositionCharacter = [];
-    console.log('генерируем team', res);
-
-    for (const num of res) {
-      let position = getRandomInt(7);
-      if (position === ArrayOfPositionCharacter.includes(position)) {
-        position = getRandomInt(7);
+    console.log('генерируем team', team, team.members);
+    let count = 0;
+    const positionNumber = [];
+    for (const num of team.members) {
+      let position = 0;
+      if (count < 2) {
+        do {
+          position = arrayForUser[getRandomInt(0, arrayForUser.length - 1)];
+        } while (positionNumber.indexOf(position) !== -1);
+        positionNumber.push(position);
+      } else {
+        do {
+          position = arrayForComputer[getRandomInt(0, arrayForComputer.length - 1)];
+        } while (positionNumber.indexOf(position) !== -1);
+        positionNumber.push(position);
       }
+      count += 1;
       console.log('position генератор', position);
-
-      const characterNew = res.members[Symbol.iterator]().next().value;
+      // characterNew = team.members.values().next().value;
+      console.log('!!!читаем команду персонаж', num);
       // ArrayOfPositionCharacter.push(new PositionedCharacter(characterNew, position));
-      characterNew.type = characterNew.type.toLowerCase();
-      ArrayOfPositionCharacter.push(new PositionedCharacter(characterNew, position));
+      // characterNew.type = characterNew.type.toLowerCase();
+
+      ArrayOfPositionCharacter.push(new PositionedCharacter(num, position));
       console.log('char генератор', ArrayOfPositionCharacter[ArrayOfPositionCharacter.length - 1]);
     }
     console.log('массив позиций', ArrayOfPositionCharacter);
+
     this.gamePlay.redrawPositions(ArrayOfPositionCharacter);
   }
 
   init() {
     this.gamePlay.drawUi('prairie');
     this.initGameDraw();
-
-    /*
-    const res = generateTeam([Bowman, Swordsman], 1, 4);
-    const ArrayOfPositionCharacter = [];
-    console.log('генерируем team', res);
-
-    for (const num of res) {
-    */
-    /*
-      const characterValue = res.members[Symbol.iterator]().next().value;
-      console.log('плэй генератор', num, characterValue, characterType[characterValue]);
-      */
-    /*
-      let position = getRandomInt(7);
-      if (position === ArrayOfPositionCharacter.includes(position)) {
-        position = getRandomInt(7);
-      }
-      console.log('position генератор', position);
-
-      const characterNew = res.members[Symbol.iterator]().next().value;
-     // ArrayOfPositionCharacter.push(new PositionedCharacter(characterNew, position));
-     characterNew.type = characterNew.type.toLowerCase();
-     ArrayOfPositionCharacter.push(new PositionedCharacter(characterNew, position));
-      console.log('char генератор', ArrayOfPositionCharacter[ArrayOfPositionCharacter.length - 1]);
-    }
-    console.log('массив позиций', ArrayOfPositionCharacter);
-    this.gamePlay.redrawPosition(ArrayOfPositionCharacter);
-    */
     // TODO: add event listeners to gamePlay events
     this.gamePlay.addCellEnterListener((index) => this.onCellEnter(index));
     this.gamePlay.addCellClickListener((index) => this.onCellClick(index));

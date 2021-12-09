@@ -9,39 +9,55 @@ import Team from './Team.js';
 import Bowman from './Bowman.js';
 import Swordsman from './Swordsman.js';
 import Undead from './Undead.js';
+import Magician from './Magician.js';
+import Daemon from './Daemon.js';
+import Vampire from './Vampire.js';
 
 const characterType = ['Bowman', 'Swordsman', 'Undead', 'Magician', 'Daemon', 'Vampire'];
 
-/*
-import Character from './Character.js';
-const array1 = Object.keys(Character.TYPES)[0];
-const array2 = Object.keys(Character.TYPES)[1];
-*/
-export function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
+export function* generateSequence(start, end, step) {
+  for (let i = start; i <= end; i += step) {
+    yield i;
+  }
 }
 
-export function* characterGenerator(allowedTypes = [Bowman, Swordsman], maxLevel) {
+export function* generateFromSequence(min, max) {
+  yield* generateSequence(min, max - 1, 8);
+  yield* generateSequence(min + 1, max, 8);
+}
+
+export function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export function* characterGenerator(allowedTypes, maxLevel) {
   for (let i = 0; i <= maxLevel; i += 1) {
-    const random = getRandomInt(maxLevel + 1);
-    const className = `${allowedTypes[i * random]}`;
-    console.log('игрок ', random, className, allowedTypes[i * random]);
+    /*
+    const random = getRandomInt(0, maxLevel + 1);
+    */
+    const random = getRandomInt(0, allowedTypes.length - 1);
+    // const className = `${allowedTypes[i * random]}`;
+    const className = `${allowedTypes[random]}`;
+    console.log('игрок : random, тип ', random, className);
     /*
     yield new allowedTypes[i * random](`${count}${characterType
       [i * random]}${i}`, characterType[i * random]);
     */
-    yield new allowedTypes[i * random](maxLevel, characterType[i * random].toLowerCase());
+    // yield new allowedTypes[i * random](maxLevel, characterType[i * random].toLowerCase());
+    // yield new allowedTypes[random](maxLevel, characterType[random].toLowerCase());
+    yield new allowedTypes[random](maxLevel, characterType[random].toLowerCase());
   }
   // TODO: write logic here
 }
 
-export function generateTeam(allowedTypes = [Bowman, Swordsman], maxLevel = 1, characterCount) {
+export function generateTeam(allowedTypes, maxLevel = 1, characterCount = 4) {
   // TODO: write logic here
   const team = new Team();
   const forUser = characterGenerator(allowedTypes, maxLevel);
-  const forComputer = characterGenerator([Bowman, Swordsman], maxLevel);
+  const forComputer = characterGenerator([Bowman,
+    Swordsman, Undead, Magician, Daemon, Vampire], maxLevel);
   for (const value of forUser) {
-    console.log('генерируем', value);
+    console.log('генерируем для юзера', value);
     team.add(value);
   }
   for (const value of forComputer) {
@@ -55,4 +71,17 @@ export function generateTeam(allowedTypes = [Bowman, Swordsman], maxLevel = 1, c
     }
     */
   return team;
+}
+
+export function generateArray(start, end, step = 8) {
+  const array = [];
+  /*
+  const forArray = generateSequence(start, end, step);
+  */
+  const forArray = generateFromSequence(start, end, step);
+  for (const value of forArray) {
+    console.log('генерируем массив', value);
+    array.push(value);
+  }
+  return array;
 }
