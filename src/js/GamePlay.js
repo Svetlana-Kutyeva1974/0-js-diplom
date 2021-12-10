@@ -125,7 +125,6 @@ export default class GamePlay {
    * @param callback
    */
   addNewGameListener(callback) {
-    console.log('играем первый раз');
     this.newGameListeners.push(callback);
   }
 
