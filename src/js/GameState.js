@@ -1,5 +1,6 @@
 export default class GameState {
-  static from = (object) => {
+  static from(object) {
+    /*
     const {
       health,
       level,
@@ -7,8 +8,10 @@ export default class GameState {
       characterCount,
       PositionedCharacter,
     } = object;
+    */
+    const { state } = object;
     // TODO: create object
-    return null;
+    return state;
   }
 
   constructor(object) {

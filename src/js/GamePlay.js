@@ -126,6 +126,12 @@ export default class GamePlay {
    */
   addNewGameListener(callback) {
     this.newGameListeners.push(callback);
+    console.log('добавление колбэк', callback);
+    /*
+    this.addNewGameListener.push(() => {
+      this.initGameDraw();
+    });
+    */
   }
 
   /**
@@ -146,6 +152,7 @@ export default class GamePlay {
     this.loadGameListeners.push(callback);
   }
 
+  // методы для клеток
   onCellEnter(event) {
     event.preventDefault();
     const index = this.cells.indexOf(event.currentTarget);
@@ -162,21 +169,26 @@ export default class GamePlay {
     const index = this.cells.indexOf(event.currentTarget);
     this.cellClickListeners.forEach((o) => o.call(null, index));
   }
+  // методы для кнопок
 
   onNewGameClick(event) {
     event.preventDefault();
+    console.log('начинаем новую игру, this, event', this, event);
     this.newGameListeners.forEach((o) => o.call(null));
   }
 
   onSaveGameClick(event) {
     event.preventDefault();
     this.saveGameListeners.forEach((o) => o.call(null));
+    console.log('сохраняем новую игру, this, event', this, event);
   }
 
   onLoadGameClick(event) {
     event.preventDefault();
     this.loadGameListeners.forEach((o) => o.call(null));
+    console.log('загружаем новую игру(восстановление), this, event', this, event);
   }
+  //
 
   static showError(message) {
     alert(message);

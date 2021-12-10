@@ -2,11 +2,14 @@ import { generateTeam, getRandomInt, generateArray } from './generators.js';
 import Bowman from './Bowman.js';
 import Swordsman from './Swordsman.js';
 import PositionedCharacter from './PositionedCharacter.js';
+import themes from './themes.js';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
+    // this.activePlayer = 0;
+    // this.level = 1;
   }
 
   initGameDraw() { // генерирует персонажи + формирует  PositionedCharacter
@@ -47,17 +50,33 @@ export default class GameController {
   }
 
   init() {
-    this.gamePlay.drawUi('prairie');
+    if (this.stateService.load() !== null) {
+      this.activePlayer = this.stateService.load().activePlayer;
+      this.level = this.stateService.load().level;
+    } else {
+      this.activePlayer = 0;
+      this.level = 1;
+    }
+
+    // this.gamePlay.drawUi('prairie');
+    // console.log('тема', themes[`level${this.level}`]);
+    this.gamePlay.drawUi(themes[`level${this.level}`]);
     this.initGameDraw();
+
     // TODO: add event listeners to gamePlay events
-    this.gamePlay.addCellEnterListener((index) => this.onCellEnter(index));
-    this.gamePlay.addCellClickListener((index) => this.onCellClick(index));
-    this.gamePlay.addCellLeaveListener((index) => this.onCellLeave(index));
+    this.gamePlay.addCellEnterListener((cellIndex) => this.onCellEnter(cellIndex));
+    this.gamePlay.addCellClickListener((cellIndex) => this.onCellClick(cellIndex));
+    this.gamePlay.addCellLeaveListener((cellIndex) => this.onCellLeave(cellIndex));
     // TODO: load saved stated from stateService
+  }
+
+  someMethodName() { // <- что это за метод и где это нужно сделать решите сами( вывод подсказки)
+    this.gameplay.addCellEnterListener(this.onCellEnter);
   }
 
   onCellClick(index) {
   // TODO: react to click
+    this.gamePlay.selectCell(index, 'yellow');
     console.log('this+index click', this, index);
   }
 
