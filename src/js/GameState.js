@@ -1,30 +1,29 @@
 export default class GameState {
-  static from(object) {
-    /*
+  static from = (object) => {
     const {
-      stateHealth,
+      health,
+      level,
       activePlayer,
+      characterCount,
       PositionedCharacter,
-      countCharacterUser,
-      countCharacterComputer,
     } = object;
-    */
     // TODO: create object
     return null;
   }
 
   constructor(object) {
     const {
-      stateHealth,
+      health,
       level,
       activePlayer,
-      countCharacterUser, countCharacterComputer, PositionedCharacter,
+      characterCount,
+      PositionedCharacter,
     } = object;
-    this.stateHealth = stateHealth;
+    this.health = health;
     this.level = level;
     this.activePlayer = activePlayer;
     this.PositionedCharacter = PositionedCharacter;
-    this.countCharacterUser = countCharacterUser;
-    this.countCharacterComputer = countCharacterComputer;
+    this.characterCount = characterCount;
+    // GameState.from(object);
   }
 }

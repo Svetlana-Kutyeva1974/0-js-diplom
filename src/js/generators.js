@@ -32,26 +32,14 @@ export function getRandomInt(min, max) {
 
 export function* characterGenerator(allowedTypes, maxLevel) {
   for (let i = 0; i <= maxLevel; i += 1) {
-    /*
-    const random = getRandomInt(0, maxLevel + 1);
-    */
     const random = getRandomInt(0, allowedTypes.length - 1);
-    // const className = `${allowedTypes[i * random]}`;
     const className = `${allowedTypes[random]}`;
     console.log('игрок : random, тип ', random, className);
-    /*
-    yield new allowedTypes[i * random](`${count}${characterType
-      [i * random]}${i}`, characterType[i * random]);
-    */
-    // yield new allowedTypes[i * random](maxLevel, characterType[i * random].toLowerCase());
-    // yield new allowedTypes[random](maxLevel, characterType[random].toLowerCase());
     yield new allowedTypes[random](maxLevel, characterType[random].toLowerCase());
   }
-  // TODO: write logic here
 }
 
 export function generateTeam(allowedTypes, maxLevel = 1, characterCount = 4) {
-  // TODO: write logic here
   const team = new Team();
   const forUser = characterGenerator(allowedTypes, maxLevel);
   const forComputer = characterGenerator([Bowman,
@@ -64,20 +52,11 @@ export function generateTeam(allowedTypes, maxLevel = 1, characterCount = 4) {
     console.log('генерируем для компа', value);
     team.add(value);
   }
-  /*
-    for (let i = 0; i < characterCount - 1; i += 1) {
-    const character = new allowedTypes[getRandomInt(allowedTypes.length)]('hero', 'Magician');
-    team.add(character);
-    }
-    */
   return team;
 }
 
 export function generateArray(start, end, step = 8) {
   const array = [];
-  /*
-  const forArray = generateSequence(start, end, step);
-  */
   const forArray = generateFromSequence(start, end, step);
   for (const value of forArray) {
     console.log('генерируем массив', value);
