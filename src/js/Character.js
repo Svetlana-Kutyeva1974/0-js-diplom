@@ -19,36 +19,14 @@ export default class Character {
     }
     // TODO: throw error if user use "new Character()"
   }
-  /*
-   constructor() {
-    this.members = new Set();
-  }
-
-  add(person) {
-    if (!this.members.has(person)) {
-      this.members.add(person);
-    } else {
-      throw new Error('Персонаж уже входит в команду');
-    }
-  }
-
-  addAll(...persons) {
-    for (const user of persons) {
-      this.members.add(user);
-    }
-  }
-
-  toArray() {
-    return [...this.members];
-  }
-}
-  */
 
   levelUp() {
     if (this.health !== 0) {
       this.level += 1;
       this.attack = Math.max(this.attack, this.attack * ((1.8 - this.health) / 100));
-      this.defence += 0.2 * this.defence;
+      // this.defence += 0.2 * this.defence;
+      this.defence = Math.max(this.defence, this.defence * ((1.8 - this.health) / 100));
+
       this.health += 80;
       if (this.health >= 100) {
         this.health = 100;
