@@ -22,6 +22,13 @@ export default class GameController {
     // this.activePlayer = 0;
     // this.level = 1;
   }
+  /*
+  getPosition(index, team){
+    const team = team;
+    const size = team.size;
+
+  }
+  */
 
   getArrayPositions(array, positionNumber, team) {
     let position = 0;
@@ -52,7 +59,7 @@ export default class GameController {
 
     // const ArrayOfPositionCharacter = [];
 
-    console.log('генерируем team', this.state.teamUser, this.state.teamComputer);
+    console.log('генерируем team', this.state.teamUser, this.state.teamUser.size, this.state.teamComputer, this.state.teamComputer.size);
     // let count = 0;
     const positionNumberUser = [];
     const positionNumberComp = [];
@@ -84,7 +91,7 @@ export default class GameController {
     // console.log('char генератор', ArrayOfPositionCharacter[ArrayOfPositionCharacter.length - 1]);
     console.log('char генератор', this.state.ArrayOfPositionCharacter);
 
-    console.log('массив позиций', this.state.ArrayOfPositionCharacter);
+    console.log('массив позиций', this.state.ArrayOfPositionCharacter, this.state.ArrayOfPositionCharacter[0]);
 
     // this.gamePlay.redrawPositions(this.ArrayOfPositionCharacter);
   }
@@ -122,9 +129,9 @@ export default class GameController {
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
     */
 
-    this.gamePlay.addCellEnterListener((cellIndex) => this.onCellEnter(cellIndex));
-    this.gamePlay.addCellClickListener((cellIndex) => this.onCellClick(cellIndex));
-    this.gamePlay.addCellLeaveListener((cellIndex) => this.onCellLeave(cellIndex));
+    this.gamePlay.addCellEnterListener((index) => this.onCellEnter(index));
+    this.gamePlay.addCellClickListener((index) => this.onCellClick(index));
+    this.gamePlay.addCellLeaveListener((index) => this.onCellLeave(index));
 
     // TODO: load saved stated from stateService
     // GamePlay.showMessage(`Уровень ${this.state.level}`);
@@ -134,20 +141,74 @@ export default class GameController {
     this.gameplay.addCellEnterListener(this.onCellEnter);
   }
 
+  getCharacter(idx) {
+    // return this.state.ArrayOfPositionCharacter.find((character) => character.position === idx);
+    return this.state.ArrayOfPositionCharacter.findIndex((character) => character.position === idx);
+  }
+  /*
+  isUserChar(idx) {
+    console.log('this+index click', this, idx);
+    if (this.getCharacter(idx) !== -1 && this.getCharacter(idx) <= (this.state.teamUser.size - 1)) {
+      // this.state.ArrayOfPositionCharacter[this.getCharacter(idx)];
+      const p = this.state.ArrayOfPositionCharacter[this.getCharacter(idx)];
+      return p;
+    }
+  }
+  */
+
   onCellClick(index) {
   // TODO: react to click
-  // this.gamePlay.selectCell(index, 'yellow');
-    console.log('this+index click', this, index);
+    let activeTeam = this.state.teamUser;
+    let count = this.state.teamUser.members.size;
+    if (this.state.activePlayer !== 0) {
+      activeTeam = this.state.teamComputer;
+      count = activeTeam.members.size;
+    }
+    console.log('this+index click', this, index, activeTeam);
+    console.log(this.state.ArrayOfPositionCharacter[this.getCharacter(index)]);
+    if (this.state.activeCell !== null) {
+      this.gamePlay.deselectCell(this.state.activeCell, 'yellow');
+
+    }
+      if (this.getCharacter(index) !== -1) {
+        if (this.getCharacter(index) < count) {
+          this.gamePlay.selectCell(index, 'yellow');
+          this.state.activeCell = index;
+        } else {
+          GamePlay.showError('Не Ваш персонаж');
+        }
+      }
+    /*
+     else {
+      // передвижение или атака
+      console.log('ждемclick');
+    }
+    */
+  }
+
+  showTools(index) {
+    // const message =
+    // `\u{1F396}${this.level}\u{2694}${this.attack}\u{1F6E1}${char.defence}\u{2764}${char.health}`;
+    const message = `\u{1F396}${6}\u{2694}${7}\u{1F6E1}${50}\u{2764}${100}`;
+    this.gamePlay.showCellTooltip(message, index);
   }
 
   onCellEnter(index) {
     // TODO: react to mouse enter
-    console.log('this+index enter', this, index);
+    const id = this.getCharacter(index);
+    console.log('this+index enter', this, index, this.getCharacter(index));
+    // this.state.ArrayOfPositionCharacter(id)
+    if (id !== -1) {
+      this.showTools(index);
+    }
   }
 
   onCellLeave(index) {
     // TODO: react to mouse leave
     console.log('this+index leave', this, index);
+    if (this.getCharacter(index) !== -1) {
+      this.gamePlay.hideCellTooltip(index);
+    }
   }
 
   onNewGame() {
@@ -187,4 +248,55 @@ export default class GameController {
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
     GamePlay.showMessage(`Level ${this.state.level}`);
   }
+
+  calcPoints(idx, char) {
+    const b = this.gamePlay.boardSize;
+    const points = [];
+    const leftBorder = [];
+    const rightBorder = [];
+    const topBorder = [];
+    const bottomBorder = [];
+
+    for (let i = 0; i < b ** 2; i += b) {
+      leftBorder.push(i);
+      rightBorder.push(i + b - 1);
+    }
+
+    for (let i = 0; i < b; i += 1) {
+      topBorder.push(i);
+      bottomBorder.push(b ** 2 - 1 - i);
+    }
+    console.log('границы', leftBorder, rightBorder, topBorder, bottomBorder);
+
+    // столбец с числоv
+    for (let n = 1; n <= char; n += 1) {
+      if (topBorder.includes(idx)) {
+        points.push(idx + (b * n));
+        // points.push(idx + (b * n)+ 1);
+        console.log('границы', (idx + (b * n)));
+      } else if (bottomBorder.includes(idx)) {
+        points.push(idx - (b * n));
+      } else {
+        points.push(idx + (b * n));
+        points.push(idx - (b * n));
+        console.log('формируем', (idx + (b * n)), (idx - (b * n)));
+      }
+
+      if (!leftBorder.includes(idx - (n - 1))) {
+        points.push(idx - n);
+        points.push(idx - (b * n + n));
+        points.push(idx + (b * n - n));
+        console.log('формируем kleft', (idx - n), (idx + (b * n - n)), (idx - (b * n + n)));
+      }
+      // points.push(idx + b*n);
+
+      if (!rightBorder.includes(idx + (n - 1))) {
+        points.push(idx + n);
+        points.push(idx - (b * n - n));
+        points.push(idx + (b * n + n));
+      }
+    }
+    return points.filter((elem) => elem >= 0 && elem <= (b ** 2 - 1));
+  }
+  // console.log(calcPoints(0, 1));
 }
