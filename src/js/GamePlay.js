@@ -127,11 +127,6 @@ export default class GamePlay {
   addNewGameListener(callback) {
     this.newGameListeners.push(callback);
     console.log('добавление колбэк', callback);
-    /*
-    this.addNewGameListener.push(() => {
-      this.initGameDraw();
-    });
-    */
   }
 
   /**

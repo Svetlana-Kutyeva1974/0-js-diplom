@@ -8,7 +8,6 @@ import Vampire from './Vampire.js';
 import PositionedCharacter from './PositionedCharacter.js';
 import themes from './themes.js';
 import GameState from './GameState.js';
-// import Team from './Team.js';
 import GamePlay from './GamePlay.js';
 
 export default class GameController {
@@ -57,40 +56,15 @@ export default class GameController {
       this.state.level, this.state.characterCount);
     // подумать, как для 2-4 уровня параметр максимума задать
 
-    // const ArrayOfPositionCharacter = [];
-
     console.log('генерируем team', this.state.teamUser, this.state.teamUser.size, this.state.teamComputer, this.state.teamComputer.size);
-    // let count = 0;
+
     const positionNumberUser = [];
     const positionNumberComp = [];
-    /*
 
-    let position = 0;
-    for (const num of this.teamUser.members) {
-      do {
-        position = arrayForUser[getRandomInt(0, arrayForUser.length - 1)];
-      } while (positionNumberUser.indexOf(position) !== -1);
-      positionNumberUser.push(position);
-      this.ArrayOfPositionCharacter.push(new PositionedCharacter(num, position));
-    }
-    */
     this.getArrayPositions(arrayForUser, positionNumberUser, this.state.teamUser);
     this.getArrayPositions(arrayForComputer, positionNumberComp, this.state.teamComputer);
 
-    /*
-    for (const num of this.teamComputer.members) {
-      do {
-        position = arrayForComputer[getRandomInt(0, arrayForComputer.length - 1)];
-      } while (positionNumberComp.indexOf(position) !== -1);
-      positionNumberComp.push(position);
-      this.ArrayOfPositionCharacter.push(new PositionedCharacter(num, position));
-    }
-    */
-    // console.log('position генератор', position);
-    // console.log('!!!читаем команду персонаж', num);
-    // console.log('char генератор', ArrayOfPositionCharacter[ArrayOfPositionCharacter.length - 1]);
     console.log('char генератор', this.state.ArrayOfPositionCharacter);
-
     console.log('массив позиций', this.state.ArrayOfPositionCharacter, this.state.ArrayOfPositionCharacter[0]);
 
     // this.gamePlay.redrawPositions(this.ArrayOfPositionCharacter);
@@ -107,54 +81,22 @@ export default class GameController {
     }
     */
 
-    // this.gamePlay.drawUi('prairie');
-    // console.log('тема', themes[`level${this.level}`]);
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
-    // this.initGameDraw();
 
-    // TODO: add event listeners to gamePlay events
-    /*
-    this.gamePlay.addNewGameListener((cellIndex) => this.gamePlay.onNewGameClick(cellIndex));
-    this.gamePlay.addSaveGameListener((cellIndex) => this.gamePlay.onSaveGameClick(cellIndex));
-    this.gamePlay.addLoadGameListener((cellIndex) => this.gamePlay.onLoadGameClick(cellIndex));
-    */
     this.gamePlay.addNewGameListener(() => this.onNewGame());
     this.gamePlay.addSaveGameListener(() => this.onSaveGame());
     this.gamePlay.addLoadGameListener(() => this.onLoadGame());
     /*
     this.gamePlay.addLoadGameListener(this.onLoadGame.bind(this));
-
-    this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
-    this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
-    this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
     */
-
     this.gamePlay.addCellEnterListener((index) => this.onCellEnter(index));
     this.gamePlay.addCellClickListener((index) => this.onCellClick(index));
     this.gamePlay.addCellLeaveListener((index) => this.onCellLeave(index));
-
-    // TODO: load saved stated from stateService
-    // GamePlay.showMessage(`Уровень ${this.state.level}`);
-  }
-
-  someMethodName() { // <- что это за метод и где это нужно сделать решите сами( вывод подсказки)
-    this.gameplay.addCellEnterListener(this.onCellEnter);
   }
 
   getCharacter(idx) {
-    // return this.state.ArrayOfPositionCharacter.find((character) => character.position === idx);
     return this.state.ArrayOfPositionCharacter.findIndex((character) => character.position === idx);
   }
-  /*
-  isUserChar(idx) {
-    console.log('this+index click', this, idx);
-    if (this.getCharacter(idx) !== -1 && this.getCharacter(idx) <= (this.state.teamUser.size - 1)) {
-      // this.state.ArrayOfPositionCharacter[this.getCharacter(idx)];
-      const p = this.state.ArrayOfPositionCharacter[this.getCharacter(idx)];
-      return p;
-    }
-  }
-  */
 
   onCellClick(index) {
   // TODO: react to click
@@ -166,18 +108,23 @@ export default class GameController {
     }
     console.log('this+index click', this, index, activeTeam);
     console.log(this.state.ArrayOfPositionCharacter[this.getCharacter(index)]);
+
     if (this.state.activeCell !== null) {
       this.gamePlay.deselectCell(this.state.activeCell, 'yellow');
-
     }
-      if (this.getCharacter(index) !== -1) {
-        if (this.getCharacter(index) < count) {
-          this.gamePlay.selectCell(index, 'yellow');
-          this.state.activeCell = index;
+    if (this.getCharacter(index) !== -1) {
+      if (this.getCharacter(index) < count) {
+        this.gamePlay.selectCell(index, 'yellow');
+        this.state.activeCell = index;
+        if (this.state.activePlayer === 0) {
+          this.state.activePlayer = 1;
         } else {
-          GamePlay.showError('Не Ваш персонаж');
+          this.state.activePlayer = 0;
         }
+      } else {
+        GamePlay.showError('Не Ваш персонаж');
       }
+    }
     /*
      else {
       // передвижение или атака
@@ -187,7 +134,6 @@ export default class GameController {
   }
 
   showTools(index) {
-    // const message =
     // `\u{1F396}${this.level}\u{2694}${this.attack}\u{1F6E1}${char.defence}\u{2764}${char.health}`;
     const message = `\u{1F396}${6}\u{2694}${7}\u{1F6E1}${50}\u{2764}${100}`;
     this.gamePlay.showCellTooltip(message, index);
@@ -212,15 +158,6 @@ export default class GameController {
   }
 
   onNewGame() {
-    /*
-    this.state.teamUser = new Team();
-    this.state.teamComputer = new Team();
-    this.activeCell = null;
-    this.state.level = 1;
-    this.state.scope = 0;
-    this.state.scopeMax = 0;
-    this.state.ArrayOfPositionCharacter = [];
-    */
     this.state = new GameState();
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
     this.initGameDraw();
@@ -286,7 +223,7 @@ export default class GameController {
         points.push(idx - n);
         points.push(idx - (b * n + n));
         points.push(idx + (b * n - n));
-        console.log('формируем kleft', (idx - n), (idx + (b * n - n)), (idx - (b * n + n)));
+        console.log('формируем left', (idx - n), (idx + (b * n - n)), (idx - (b * n + n)));
       }
       // points.push(idx + b*n);
 
@@ -298,5 +235,4 @@ export default class GameController {
     }
     return points.filter((elem) => elem >= 0 && elem <= (b ** 2 - 1));
   }
-  // console.log(calcPoints(0, 1));
 }
