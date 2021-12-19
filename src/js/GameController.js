@@ -21,13 +21,6 @@ export default class GameController {
     // this.activePlayer = 0;
     // this.level = 1;
   }
-  /*
-  getPosition(index, team){
-    const team = team;
-    const size = team.size;
-
-  }
-  */
 
   getArrayPositions(array, positionNumber, team) {
     let position = 0;
@@ -71,15 +64,6 @@ export default class GameController {
   }
 
   init() {
-    /*
-    if (this.stateService.load() !== null) {
-      this.state.activePlayer = this.stateService.load().activePlayer;
-      this.state.level = this.stateService.load().level;
-    } else {
-      this.state.activePlayer = 0;
-      this.state.level = 1;
-    }
-    */
 
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
 
@@ -116,21 +100,16 @@ export default class GameController {
       if (this.getCharacter(index) < count) {
         this.gamePlay.selectCell(index, 'yellow');
         this.state.activeCell = index;
-        if (this.state.activePlayer === 0) {
+       /* if (this.state.activePlayer === 0) {
           this.state.activePlayer = 1;
         } else {
           this.state.activePlayer = 0;
         }
+        */
       } else {
         GamePlay.showError('Не Ваш персонаж');
       }
     }
-    /*
-     else {
-      // передвижение или атака
-      console.log('ждемclick');
-    }
-    */
   }
 
   showTools(index) {
