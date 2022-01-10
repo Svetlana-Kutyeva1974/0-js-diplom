@@ -13,6 +13,7 @@ export default class GameState {
       teamUser,
       teamComputer,
       activeCell,
+      activeTeam,
     } = object;
     // return object;
     return {
@@ -26,19 +27,21 @@ export default class GameState {
       teamUser,
       teamComputer,
       activeCell,
+      activeTeam,
     };
   }
 
   constructor() {
     this.health = 50;
     this.level = 1;
-    this.activePlayer = 0;
+    this.activePlayer = undefined;
     this.ArrayOfPositionCharacter = [];
     this.characterCount = 2;
     this.scope = 0;
     this.scopeMax = 0;
     this.teamUser = new Team();
     this.teamComputer = new Team();
-    this.activeCell = null;
+    this.activeCell = -1;
+    this.activeTeam = this.teamUser;
   }
 }

@@ -5,9 +5,11 @@
  * @param maxLevel max character level
  * @returns Character type children (ex. Magician, Bowman, etc)
  */
+import Bowman from './Bowman.js';
 import Team from './Team.js';
 
-const characterType = ['Bowman', 'Swordsman', 'Undead', 'Magician', 'Daemon', 'Vampire'];
+// let characterType = ['Bowman', 'Swordsman', 'Magician', 'Undead', 'Daemon', 'Vampire'];
+let characterType;
 
 export function* generateSequence(start, end, step) {
   for (let i = start; i <= end; i += step) {
@@ -31,6 +33,11 @@ export function* characterGenerator(allowedTypes, maxLevel) {
   console.log('игрок : random, тип ', random, className);
   if (maxLevel > 1) {
     level = getRandomInt(1, maxLevel);
+  }
+  if (allowedTypes[0] === Bowman) {
+    characterType = ['Bowman', 'Swordsman', 'Magician'];
+  } else {
+    characterType = ['Undead', 'Daemon', 'Vampire'];
   }
   yield new allowedTypes[random](level, characterType[random].toLowerCase());
 }
