@@ -15,7 +15,6 @@ export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
-    // this.state = new GameState();
   }
 
   getArrayPositions(array, positionNumber, team) {
@@ -150,6 +149,7 @@ export default class GameController {
         console.log('входит в команду- значит перевыбор');
         this.gamePlay.selectCell(index, 'yellow');
         this.state.activeCell = index;
+
         this.state.activePlayer = this.getCharacter(index).character;
         // this.state.activeTeam = this.state.teamUser;
         console.log('click на новом персонаже юзера!!!', this.state.activePlayer, this.state.activeTeam);
