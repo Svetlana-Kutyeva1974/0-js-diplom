@@ -74,11 +74,18 @@ export default class GameController {
     this.gamePlay.addCellLeaveListener((index) => this.onCellLeave(index));
   }
   /**
- * Возвращает обьект : персонажа и его позицию из массиве позиций
+ * Возвращает обьект : персонажа и его позицию из массиве обьектов
  */
 
   getCharacter(idx) {
     return this.state.ArrayOfPositionCharacter.find((character) => character.position === idx);
+  }
+  /**
+ * Возвращает индекс обьекта персонажа в массиве обьектов
+ */
+
+  getCharIndex(idx) {
+    return this.state.ArrayOfPositionCharacter.findIndex((character) => character.position === idx);
   }
 
   isCharUser(idx) {
@@ -93,26 +100,19 @@ export default class GameController {
 
   isCharInTeam(idx) {
     const character = this.getCharacter(idx);
-    return (this.state.activeTeam.toArray().find((char) => char === character.character));
+    return (this.state.activeTeam.toArray().find((char) => char === character.character))
+    || undefined;
   }
 
   onCellClick(index) {
   // TODO: react to click
-  // let activeTeam = this.state.teamUser;
-    // let count = this.state.teamUser.members.size;
-
-    // let count = this.state.activeTeam.members.size;
-    /*
-    if (this.state.activePlayer !== undefined) {
-      this.state.activeTeam = this.state.teamComputer;
-      count = this.state.activeTeam.members.size;
-    }
-    */
     console.log('this+index+актив команда click', this, index, this.state.activeTeam);
     // console.log(this.state.ArrayOfPositionCharacter[this.getCharacter(index)]);
 
-    if ((this.state.activeCell !== -1 && this.state.activePlayer !== undefined)
-    && this.isCharInTeam(index) !== undefined) {
+    if (this.state.activeCell !== -1 && this.state.activePlayer !== undefined
+      && this.isCharInTeam(this.state.activeCell) !== undefined) {
+    // && this.isCharInTeam(index) !== undefined) {
+    // && !this.getCharacter(index)) {
       //  {
       this.gamePlay.deselectCell(this.state.activeCell, 'yellow');
     }
@@ -131,17 +131,13 @@ export default class GameController {
           } else {
             GamePlay.showError('Не Ваш персонаж');
           }
-        // } else {
-        // передвижение или атака
-        // this.gamePlay.selectCell(index, 'red');
-        // console.log('ждемclick');
         }
       }
       while (this.state.activeCell === -1);
-      // выбор игрока сделан
-    } else if (this.getCharacter(index)) { // игра идет
-      // если продолжение игры и выбран персонаж
 
+    // выбор игрока сделан
+    } else if (this.getCharacter(index)) { // игра идет
+      // если продолжение игры и выбран некий персонаж
       console.log('продолжаем игру');
 
       if (this.isCharInTeam(index)) { // персонаж команды активного игрока
@@ -149,31 +145,46 @@ export default class GameController {
         console.log('входит в команду- значит перевыбор');
         this.gamePlay.selectCell(index, 'yellow');
         this.state.activeCell = index;
-
         this.state.activePlayer = this.getCharacter(index).character;
         // this.state.activeTeam = this.state.teamUser;
         console.log('click на новом персонаже юзера!!!', this.state.activePlayer, this.state.activeTeam);
-      } else {
+      } else if (this.checkAllowPoints(index, this.state.activePlayer.attackDistance)) {
         // если есть активный персонаж, а клик на песонаже противника =
         //  проверка возможна ли  атака&
-        GamePlay.showError('Не Ваш персонаж');
-      }
-    }
-    /*
-    if (this.state.activeCell !== null && this.state.activePlayer !== undefined) {
-      const allowPointsMove = this.calcPoints(this.state.activeCell,
-        this.state.activePlayer.distance);
-      console.log('массив допустимых перемещений', allowPointsMove);
-
-      if (allowPointsMove.includes(this.state.activeCell)) {
-        this.gamePlay.selectCell(index, 'red');
+        console.log('возможна атака');
+        //  this.attack();
       } else {
-        GamePlay.showError('Недопустимая позиция');
+        GamePlay.showError('Атака не возможна!!!');
       }
-      // this.gamePlay.selectCell(index, 'red');
-      console.log('ждемclick');
+      // нет какого-либо персонажа в кликнутой клетке
+    } else if (!this.getCharacter(index)
+    && this.checkAllowPoints(index, this.state.activePlayer.distance)) {
+      // клетка пустая выбрана, проверка на возможное перемещение
+      // функция перемещения
+      console.log('возможно перемещение');
+      // --
+      this.gamePlay.deselectCell(this.state.activeCell);
+      this.gamePlay.selectCell(index, 'yellow');
+
+      // меняем элемент в массиве позиций
+      // const Findcharacter = this.getCharacter(this.state.activeCell).position;
+      // находим обьект активного персонажа и меняем его позицию
+
+      console.log('array position before', this.state.ArrayOfPositionCharacter,
+        this.state.activeCell, index, 'данные \n', this.getCharIndex(this.state.activeCell),
+        new PositionedCharacter(this.getCharacter(this.state.activeCell).character, index));
+
+      this.state.ArrayOfPositionCharacter.splice(this.getCharIndex(this.state.activeCell), 1,
+        new PositionedCharacter(this.getCharacter(this.state.activeCell).character, index));
+      this.gamePlay.deselectCell(this.state.activeCell);
+      this.state.activeCell = index;
+      console.log('array position new', this.state.ArrayOfPositionCharacter, this.state.activeCell, index);
+      this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
+      this.gamePlay.selectCell(index, 'yellow');
+    } else if (!this.getCharacter(index)
+    && !this.checkAllowPoints(index, this.state.activePlayer.distance)) {
+      GamePlay.showError('Перемещение не возможно!!!');
     }
-    */
   }
 
   showTools(positionedCharacter) {
@@ -193,27 +204,18 @@ export default class GameController {
       // есть персонаж,но он персонаж не активного игрока, проверяем на атаку
 
       if (this.state.activePlayer && !this.isCharInTeam(index)) {
-        const allowPointsAttack = this.calcPoints(this.state.activeCell,
-          this.state.activePlayer.attackDistance);
-        if (allowPointsAttack.includes(index)) {
+        if (this.checkAllowPoints(index, this.state.activePlayer.attackDistance)) {
           this.gamePlay.selectCell(index, 'red');
           this.gamePlay.setCursor(cursors.crosshair);
+          // ждем функ атаки
         } else {
           // GamePlay.showError('Недопустимая позиция атаки');
           this.gamePlay.setCursor(cursors.notallowed);
         }
       }
     } else if (this.state.activePlayer) { // клетка пуста, но есть активный игрок
-      const allowPointsMove = this.calcPoints(this.state.activeCell,
-        this.state.activePlayer.distance);
       // allowPointsMove.filter((elem) => this.isCharInTeam(elem) === undefined);
-      /*
-      const allowPointsAttack = this.calcPoints(this.state.activeCell,
-        this.state.activePlayer.attackDistance);
-      */
-      console.log('массив допустимых перемещений', allowPointsMove, this.state.activePlayer.distance);
-
-      if (allowPointsMove.includes(index)) {
+      if (this.checkAllowPoints(index, this.state.activePlayer.distance)) {
         this.gamePlay.selectCell(index, 'green');
         this.gamePlay.setCursor(cursors.pointer);
       } else {
@@ -228,10 +230,10 @@ export default class GameController {
     // TODO: react to mouse leave
     console.log('this+index leave', this, index);
     // this.gamePlay.setCursor(cursors.pointer);
-    if (this.getCharacter(index)) {
+    if (this.getCharacter(index)) { // eсть персонаж
       this.gamePlay.hideCellTooltip(index);
     } else {
-      this.gamePlay.deselectCell(index);
+      this.gamePlay.deselectCell(index); // пустая клетка
       // this.gamePlay.setCursor(cursors.pointer);
     }
   }
@@ -285,27 +287,41 @@ export default class GameController {
       topBorder.push(i);
       bottomBorder.push(b ** 2 - 1 - i);
     }
-    console.log('границы', leftBorder, rightBorder, topBorder, bottomBorder);
+    // console.log('границы', leftBorder, rightBorder, topBorder, bottomBorder);
 
     // столбец с числоv
     for (let n = 1; n <= charCharacter; n += 1) {
       if (topBorder.includes(idx)) {
         points.push(idx + (b * n));
         // points.push(idx + (b * n)+ 1);
-        console.log('границы', (idx + (b * n)));
+        // console.log('границы', (idx + (b * n)));
       } else if (bottomBorder.includes(idx)) {
         points.push(idx - (b * n));
       } else {
         points.push(idx + (b * n));
         points.push(idx - (b * n));
-        console.log('формируем', (idx + (b * n)), (idx - (b * n)));
+        // console.log('формируем', (idx + (b * n)), (idx - (b * n)));
       }
 
       if (!leftBorder.includes(idx - (n - 1))) {
         points.push(idx - n);
         points.push(idx - (b * n + n));
         points.push(idx + (b * n - n));
-        console.log('формируем left', (idx - n), (idx + (b * n - n)), (idx - (b * n + n)));
+        // console.log('формируем left', (idx - n), (idx + (b * n - n)), (idx - (b * n + n)));
+        for (let j = 1; j <= n - 1; j += 1) {
+          // if (n <= char - 1){
+          points.push(idx + (b - 1) * n + j);
+          points.push(idx - (b + 1) * n + j);
+        /*
+          points.push(idx + (b - n));
+          points.push(idx - (b + n));
+          */
+        }
+        for (let j = 1; j <= n - 2; j += 1) {
+          // if (n <= char - 1) {
+          points.push(idx + (b - n) + b * j);
+          points.push(idx - (b + n) - b * j);
+        }
       }
       // points.push(idx + b*n);
 
@@ -313,12 +329,34 @@ export default class GameController {
         points.push(idx + n);
         points.push(idx - (b * n - n));
         points.push(idx + (b * n + n));
+
+        for (let j = 1; j <= n - 1; j += 1) {
+          // if (n <= char - 1) {
+          points.push(idx - (b - 1) * n - j);
+          points.push(idx + (b + 1) * n - j);
+
+          points.push(idx - (b - n));
+          points.push(idx + (b + n));
+        }
+
+        for (let j = 1; j <= n - 2; j += 1) {
+          // if (n <= char - 1) {
+          points.push(idx - (b + n) - b * j);
+          points.push(idx + (b - n) + b * j);
+        }
       }
     }
     return points.filter((elem) => elem >= 0 && elem <= (b ** 2 - 1));
   }
-/*
-  isInCalcPoints(idx, charCharacter) {
+
+  checkAllowPoints(idx, charCharacter) {
+    const allowPoints = this.calcPoints(this.state.activeCell, charCharacter);
+    const value = allowPoints.includes(idx);
+    console.log('допустимые перемещения/атака', allowPoints, value);
+    return value;
   }
-  */
+
+  transfer() {
+    console.log(this);
+  }
 }
