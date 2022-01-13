@@ -174,11 +174,14 @@ export default class GameController {
         this.state.activeCell, index, 'данные \n', this.getCharIndex(this.state.activeCell),
         new PositionedCharacter(this.getCharacter(this.state.activeCell).character, index));
 
-      this.state.ArrayOfPositionCharacter.splice(this.getCharIndex(this.state.activeCell), 1,
+      const number = this.state.ArrayOfPositionCharacter
+        .indexOf(this.getCharacter(this.state.activeCell));
+      // this.state.ArrayOfPositionCharacter.splice(this.getCharIndex(this.state.activeCell), 1,
+      this.state.ArrayOfPositionCharacter.splice(number, 1,
         new PositionedCharacter(this.getCharacter(this.state.activeCell).character, index));
+      console.log('array position new', this.state.ArrayOfPositionCharacter, this.state.activeCell, index);
       this.gamePlay.deselectCell(this.state.activeCell);
       this.state.activeCell = index;
-      console.log('array position new', this.state.ArrayOfPositionCharacter, this.state.activeCell, index);
       this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
       this.gamePlay.selectCell(index, 'yellow');
     } else if (!this.getCharacter(index)
@@ -304,45 +307,35 @@ export default class GameController {
       }
 
       if (!leftBorder.includes(idx - (n - 1))) {
+      // if (!leftBorder.includes(idx - 1)) {
         points.push(idx - n);
         points.push(idx - (b * n + n));
         points.push(idx + (b * n - n));
+
         // console.log('формируем left', (idx - n), (idx + (b * n - n)), (idx - (b * n + n)));
         for (let j = 1; j <= n - 1; j += 1) {
-          // if (n <= char - 1){
+        // if (n <= char - 1){
+          points.push(idx + (b - 1) * n - b * j);
+          points.push(idx - (b + 1) * n + b * j);
+
           points.push(idx + (b - 1) * n + j);
           points.push(idx - (b + 1) * n + j);
-        /*
-          points.push(idx + (b - n));
-          points.push(idx - (b + n));
-          */
-        }
-        for (let j = 1; j <= n - 2; j += 1) {
-          // if (n <= char - 1) {
-          points.push(idx + (b - n) + b * j);
-          points.push(idx - (b + n) - b * j);
         }
       }
       // points.push(idx + b*n);
-
       if (!rightBorder.includes(idx + (n - 1))) {
+      // if (!rightBorder.includes(idx - 1)) {
+      // if (!rightBorder.includes(idx)) {
         points.push(idx + n);
         points.push(idx - (b * n - n));
         points.push(idx + (b * n + n));
 
         for (let j = 1; j <= n - 1; j += 1) {
-          // if (n <= char - 1) {
+        // if (n <= char - 1) {
+          points.push(idx - (b - 1) * n + b * j);
+          points.push(idx + (b + 1) * n - b * j);
           points.push(idx - (b - 1) * n - j);
           points.push(idx + (b + 1) * n - j);
-
-          points.push(idx - (b - n));
-          points.push(idx + (b + n));
-        }
-
-        for (let j = 1; j <= n - 2; j += 1) {
-          // if (n <= char - 1) {
-          points.push(idx - (b + n) - b * j);
-          points.push(idx + (b - n) + b * j);
         }
       }
     }
@@ -354,6 +347,14 @@ export default class GameController {
     const value = allowPoints.includes(idx);
     console.log('допустимые перемещения/атака', allowPoints, value);
     return value;
+  }
+
+  deleteChar(index) {
+    const number = this.state.ArrayOfPositionCharacter
+      .indexOf(this.getCharacter(index));
+    this.state.ArrayOfPositionCharacter.splice(number, 1);
+    // console.log('array position new', this.state.ArrayOfPositionCharacter, index);
+    this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
   }
 
   transfer() {
