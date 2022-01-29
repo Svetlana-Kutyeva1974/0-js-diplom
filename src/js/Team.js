@@ -44,6 +44,10 @@ export default class Team {
     }
   }
 
+  delete(person) {
+    this.members.delete(person);
+  }
+
   toArray() {
     return [...this.members];
   }

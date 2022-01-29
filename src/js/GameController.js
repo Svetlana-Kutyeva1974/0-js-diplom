@@ -59,7 +59,7 @@ export default class GameController {
   }
 
   init() {
-    this.state = new GameState();
+    this.state = new GameState();// позже статик применить
 
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
 
@@ -84,6 +84,10 @@ export default class GameController {
  * Возвращает индекс обьекта персонажа в массиве обьектов
  */
 
+  findChar(char) {
+    return this.state.ArrayOfPositionCharacter.findIndex((ch) => ch.character === char);
+  }
+
   getCharIndex(idx) {
     return this.state.ArrayOfPositionCharacter.findIndex((character) => character.position === idx);
   }
@@ -104,7 +108,7 @@ export default class GameController {
     || undefined;
   }
 
-  onCellClick(index) {
+  async onCellClick(index) {
   // TODO: react to click
     console.log('this+index+актив команда click', this, index, this.state.activeTeam);
     // console.log(this.state.ArrayOfPositionCharacter[this.getCharacter(index)]);
@@ -118,11 +122,11 @@ export default class GameController {
     }
 
     if (this.state.activeCell === -1) { // начало игры
-      this.state.activeTeam = this.state.teamUser;
+      // this.state.activeTeam = this.state.teamUser; вынести в начальные данные
       do {
         if (this.getCharacter(index)) {
         // если начало игры и выбран персонаж
-          if (this.isCharUser(index)) { // персонаж игрока
+          if (this.isCharUser(index)) { // персонаж игрока// в общем случае заменить на isCharInTeam
             this.gamePlay.selectCell(index, 'yellow');
             this.state.activeCell = index;
             this.state.activePlayer = this.getCharacter(index).character;
@@ -153,6 +157,28 @@ export default class GameController {
         //  проверка возможна ли  атака&
         console.log('возможна атака');
         //  this.attack();
+
+        const personAttack = this.state.activePlayer;
+        const target = this.getCharacter(index).character;
+        console.log('цель', target);
+        const damage = Math.max(personAttack.attack - target.defence, personAttack.attack * 0.1);
+        await this.gamePlay.showDamage(index, damage);
+        console.log('атака прошла урон:', damage);
+        target.health -= damage;
+        this.gamePlay.deselectCell(index);
+        this.gamePlay.selectCell(this.state.activeCell, 'yellow');
+        this.gamePlay.setCursor(cursors.pointer);
+        if (target.health <= 0) {
+          this.deleteChar(target.position);
+          this.teamComputer.delete(target.character);
+          // this.gamePlay.deselectCell(this.gameState.selected);
+          // this.gameState.selected = null;
+        }
+        this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
+        // end
+        this.transferComp();
+        this.checkState();// проверка уровня и состояния игры
+        // закончили и передали ход
       } else {
         GamePlay.showError('Атака не возможна!!!');
       }
@@ -160,11 +186,12 @@ export default class GameController {
     } else if (!this.getCharacter(index)
     && this.checkAllowPoints(index, this.state.activePlayer.distance)) {
       // клетка пустая выбрана, проверка на возможное перемещение
+
       // функция перемещения
       console.log('возможно перемещение');
       // --
       this.gamePlay.deselectCell(this.state.activeCell);
-      this.gamePlay.selectCell(index, 'yellow');
+      this.gamePlay.selectCell(index, 'yellow');// проверить нужны ли эти2 строчки
 
       // меняем элемент в массиве позиций
       // const Findcharacter = this.getCharacter(this.state.activeCell).position;
@@ -184,6 +211,21 @@ export default class GameController {
       this.state.activeCell = index;
       this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
       this.gamePlay.selectCell(index, 'yellow');
+      //  и похоже задвоение см 168 строку
+
+      // ---
+      // переход хода?
+      /*
+      if (this.state.activeTeam === this.state.teamUser) {
+        this.state.activeTeam = this.state.teamComp;
+        this.state.activeCell === -1;
+      } else {
+        this.state.activeTeam = this.state.teamUser;
+        this.state.activeCell === -1;
+      }
+      */
+      // переход хода?
+      this.transferComp();
     } else if (!this.getCharacter(index)
     && !this.checkAllowPoints(index, this.state.activePlayer.distance)) {
       GamePlay.showError('Перемещение не возможно!!!');
@@ -217,6 +259,7 @@ export default class GameController {
         }
       }
     } else if (this.state.activePlayer) { // клетка пуста, но есть активный игрок
+      // возможно перемещение
       // allowPointsMove.filter((elem) => this.isCharInTeam(elem) === undefined);
       if (this.checkAllowPoints(index, this.state.activePlayer.distance)) {
         this.gamePlay.selectCell(index, 'green');
@@ -243,8 +286,10 @@ export default class GameController {
 
   onNewGame() {
     this.state = new GameState();
+
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
     this.initGameDraw();
+    this.state.activeTeam = this.state.teamUser;
 
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
     GamePlay.showMessage(`Level ${this.state.level}`);
@@ -308,6 +353,7 @@ export default class GameController {
 
       if (!leftBorder.includes(idx - (n - 1))) {
       // if (!leftBorder.includes(idx - 1)) {
+        // левая сторона от числа
         points.push(idx - n);
         points.push(idx - (b * n + n));
         points.push(idx + (b * n - n));
@@ -321,11 +367,27 @@ export default class GameController {
           points.push(idx + (b - 1) * n + j);
           points.push(idx - (b + 1) * n + j);
         }
+      } else if (!topBorder.includes(idx - (n - 1) - b)) {
+        for (let j = 1; j <= n - 1; j += 1) {
+          points.push(idx - (b + 1) * n + j);//
+        }
+      } else if (!bottomBorder.includes(idx - (n - 1) + b)) {
+        for (let j = 1; j <= n - 1; j += 1) {
+          points.push(idx + (b - 1) * n + j); //
+        }
+      } else {
+        for (let j = 1; j <= n - 1; j += 1) {
+          points.push(idx + (b - 1) * n + j);
+          points.push(idx - (b + 1) * n + j);
+        }
       }
+
       // points.push(idx + b*n);
       if (!rightBorder.includes(idx + (n - 1))) {
       // if (!rightBorder.includes(idx - 1)) {
       // if (!rightBorder.includes(idx)) {
+
+        // правая сторона от числа
         points.push(idx + n);
         points.push(idx - (b * n - n));
         points.push(idx + (b * n + n));
@@ -334,6 +396,19 @@ export default class GameController {
         // if (n <= char - 1) {
           points.push(idx - (b - 1) * n + b * j);
           points.push(idx + (b + 1) * n - b * j);
+          points.push(idx - (b - 1) * n - j);
+          points.push(idx + (b + 1) * n - j);
+        }
+      } else if (!topBorder.includes(idx + (n - 1) - b)) {
+        for (let j = 1; j <= n - 1; j += 1) {
+          points.push(idx - (b - 1) * n - j);
+        }
+      } else if (!bottomBorder.includes(idx + (n - 1) + b)) {
+        for (let j = 1; j <= n - 1; j += 1) {
+          points.push(idx + (b + 1) * n - j);// ! низ!
+        }
+      } else {
+        for (let j = 1; j <= n - 1; j += 1) {
           points.push(idx - (b - 1) * n - j);
           points.push(idx + (b + 1) * n - j);
         }
@@ -357,7 +432,83 @@ export default class GameController {
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
   }
 
-  transfer() {
+  async transferComp() {
+    console.log(this);
+    const oldactive = this.state.activeCell;
+    const oldPlayer = this.state.activePlayer;
+
+    this.state.activeTeam = this.state.teamComputer;
+    console.log('менякм актив команду', this.state.activeTeam);
+    const arr = this.state.activeTeam.toArray();
+    const sum = this.state.ArrayOfPositionCharacter.length;
+    const idxInTeam = getRandomInt(arr.length, sum - 1);
+    console.log('инд в масс противника', idxInTeam);
+    const { character, position } = this.state.ArrayOfPositionCharacter[idxInTeam];
+
+    this.state.activePlayer = this.getCharacter(position).character;
+    this.state.activeCell = position;
+    // выбрали игрока компьютера
+    console.log('игрок противника', position, character.type, this.state.ArrayOfPositionCharacter[idxInTeam]);
+    console.log(this.state.activePlayer);
+    // возможна ли атака? если да, атакуем, нет - перемещаемся
+    //
+    let attack = this.state.ArrayOfPositionCharacter[0].position;
+    for (let j = 1; j < this.state.teamUser.toArray().length; j += 1) {
+      if ((this.state.ArrayOfPositionCharacter[j].position - position) <= (attack - position)) {
+        attack = this.state.ArrayOfPositionCharacter[j].position;
+      }
+    }
+    const allowPoints = this.calcPoints(position, this.state.activePlayer.attackDistance);
+    const allowPoints2 = this.calcPoints(position, this.state.activePlayer.distance);
+    const value = allowPoints.includes(attack);
+    if (value) {
+      // если есть активный персонаж, а клик на песонаже противника =
+      //  проверка возможна ли  атака&
+      console.log('возможна атака, т.к есть персонаж в зоне атаки\n value', value);
+      const personAttacker = character;
+      const target = this.getCharacter(attack).character;
+      console.log('цель', target);
+      const damage = Math.max(personAttacker.attack - target.defence, personAttacker.attack * 0.1);
+      await this.gamePlay.showDamage(attack, damage);
+      console.log('атака прошла урон:', damage);
+      target.health -= damage;
+      if (target.health <= 0) {
+        this.deleteChar(target.position);// удаляем в общем массиве
+        this.teamUser.delete(target.character); //
+      }
+      this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
+      this.checkState();// проверка уровня и состояния игры
+      //  this.attack();
+    } else {
+      GamePlay.showError('играет компьютер!Атака не возможна!!!');// делаем перемещение
+      //
+      // находим случайную точку в массиве возможных
+      const index1 = getRandomInt(0, allowPoints2.length - 1);
+      console.log(' индекс в массиве допустим перемещ и сам массив ', index1, allowPoints2);
+      const indexNew = allowPoints2[index1];
+      console.log('новая выбранная поциция комп', indexNew);
+      // move
+      console.log('array position before', this.state.ArrayOfPositionCharacter,
+        position, indexNew, 'данные \n', this.getCharIndex(position));
+
+      const number = this.state.ArrayOfPositionCharacter
+        .indexOf(this.getCharacter(position));
+      this.state.ArrayOfPositionCharacter.splice(number, 1,
+        new PositionedCharacter(this.getCharacter(position).character, indexNew));
+
+      console.log('array position new', this.state.ArrayOfPositionCharacter, position, indexNew);
+      this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
+      // this.gamePlay.deselectCell(this.state.activeCell);
+    }
+
+    this.state.activeTeam = this.state.teamUser;
+    this.state.activeCell = oldactive;
+    this.state.activePlayer = oldPlayer;
+    // return { character, position };
+    //
+  }
+
+  checkState() {
     console.log(this);
   }
 }
