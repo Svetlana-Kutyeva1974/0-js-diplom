@@ -1,11 +1,29 @@
-/*
-test('app string length name error', () => {
-  expect(() => {
-    // eslint-disable-next-line no-unused-vars
-    const obj = new Character('heroismerror', 'Magician');
-  }).toThrow(/Ошибка, имя должно содержать не менее 2 и не более 10 символов/);
+import Character from '../Character.js';
+import Bowman from '../Bowman.js';
+import Daemon from '../Daemon.js';
+import Magician from '../Magician.js';
+import Swordsman from '../Swordsman.js';
+import Undead from '../Undead.js';
+import Vampire from '../Vampire.js';
+
+test('При попытке создать новый объект класса Character выбрасывается ошибка', () => {
+  expect(() => new Character(1)).toThrowError(new Error('create objects of the Character class'));
 });
 
+test.each([
+  [new Bowman(1)],
+  [new Daemon(1)],
+  [new Magician(1)],
+  [new Swordsman(1)],
+  [new Undead(1)],
+  [new Vampire(1)],
+])(
+  ('Не должно быть выброса ошибки'), (char) => {
+    expect(() => char).not.toThrow();
+  },
+);
+
+/*
 test('app type error ', () => {
   expect(() => {
     // eslint-disable-next-line no-unused-vars
