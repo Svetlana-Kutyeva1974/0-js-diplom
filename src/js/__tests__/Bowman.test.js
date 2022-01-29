@@ -1,7 +1,5 @@
-import Bowman from '../Bowman.js';
-import Character from '../app.js';
-
-/*test('string length name error', () => {
+/*
+test('string length name error', () => {
   const result = new Bowman('hero', 'Bowman');
   expect(result.attack).toBe(Character.TYPES[`${result.type}`][0]);
 });

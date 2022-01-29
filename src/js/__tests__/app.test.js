@@ -1,4 +1,3 @@
-import Character from '../app.js';
 /*
 test('app string length name error', () => {
   expect(() => {
