@@ -1,15 +1,15 @@
-import Character from '../Character.js';
+// import Character from '../Character.js';
 import Bowman from '../Bowman.js';
 import Daemon from '../Daemon.js';
 import Magician from '../Magician.js';
 import Swordsman from '../Swordsman.js';
 import Undead from '../Undead.js';
 import Vampire from '../Vampire.js';
-
+/*
 test('При попытке создать новый объект класса Character выбрасывается ошибка', () => {
   expect(() => new Character(1)).toThrowError(new Error('create objects of the Character class'));
 });
-
+*/
 test.each([
   [new Bowman(1)],
   [new Daemon(1)],
