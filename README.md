@@ -1,5 +1,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/cq1t0c3yajwvbgg7?svg=true)](https://ci.appveyor.com/project/Svetlana-Kutyeva1974/0-js-diplom)
 
+# [GP-PAGES](https://svetlana-kutyeva1974.github.io/0-js-diplom/) 
+
 # AJS. Retro Game
 
 ###### tags: `netology` `advanced js`
