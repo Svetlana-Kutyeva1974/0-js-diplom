@@ -182,6 +182,7 @@ export default class GameController {
           // this.gamePlay.deselectCell(this.gameState.selected);
           // this.gameState.selected = null;
           console.log('команда компа после удаления:', this.state.teamComputer);
+          this.checkState();// проверка уровня и состояния игры
         }
         /* else {
           this.gamePlay.selectCell(this.state.activeCell, 'yellow');
@@ -190,8 +191,9 @@ export default class GameController {
         this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
         this.gamePlay.selectCell(this.state.activeCell, 'yellow');
         // end
+        //  this.checkState();// проверка уровня и состояния игры
         this.transferComp();
-        this.checkState();// проверка уровня и состояния игры
+        // this.checkState();// проверка уровня и состояния игры
         // закончили и передали ход
       } else {
         GamePlay.showError('Атака не возможна!!!');
@@ -482,6 +484,7 @@ export default class GameController {
     // возможна ли атака? если да, атакуем, нет - перемещаемся
     //
     let attack = this.state.ArrayOfPositionCharacter[0].position;
+    // если на нулевом месте не юзер персон?
     for (let j = 1; j < this.state.teamUser.toArray().length; j += 1) {
       if ((this.state.ArrayOfPositionCharacter[j].position - position) <= (attack - position)) {
         attack = this.state.ArrayOfPositionCharacter[j].position;
@@ -516,15 +519,19 @@ export default class GameController {
         this.state.teamUser.delete(target); //
         // this.teamUser.delete(target.character);
         console.log('команда юзера после удаления:', this.state.teamUser);
-        if (attack === this.state.activeCell) { // снять выбор активного у юзера
+
+        if (attack === oldactive) { // снять выбор активного у юзера
           this.gamePlay.deselectCell(this.state.activeCell);
           this.state.activeCell = -1;
           this.activePlayer = undefined;
+          this.state.activeTeam = this.state.teamUser;
         }
+        // после удаления команда юзера пуста
+        this.checkState();
       }
       this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
       // this.gamePlay.selectCell(this.state.activeCell, 'yellow');
-      this.checkState();// проверка уровня и состояния игры
+      // this.checkState();// проверка уровня и состояния игры?????
       //  this.attack();
     } else {
       // GamePlay.showError('играет компьютер!Атака не возможна!!!');// делаем перемещение
@@ -550,17 +557,50 @@ export default class GameController {
     }
 
     this.state.activeTeam = this.state.teamUser;
-    this.state.activeCell = oldactive;
-    this.state.activePlayer = oldPlayer;
+    if (this.state.activeCell !== -1) {
+      this.state.activeCell = oldactive;
+      this.state.activePlayer = oldPlayer;
+    }
     // this.gamePlay.selectCell(this.state.activeCell, 'yellow');
     // return { character, position };
     //
+  }
+
+  onNextLevelGame() {
+    // this.state = new GameState();
+
+    this.gamePlay.drawUi(themes[`level${this.state.level}`]);
+    // this.initGameDraw();
+    // this.state.activeTeam = this.state.teamUser;
+
+    this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
+    GamePlay.showMessage(`Level ${this.state.level}`);
+  }
+
+  newLevel() {
+    this.state.level += 1;
+    if (this.state.level > 4) {
+      console.log('Игра окончена');
+      // заблокировать? снять обработчики?
+      this.gamePlay.addNewGameListener(() => this.onNewGame());
+      this.gamePlay.addSaveGameListener(() => this.onSaveGame());
+      this.gamePlay.addLoadGameListener(() => this.onLoadGame());
+      /*
+      this.gamePlay.addLoadGameListener(this.onLoadGame.bind(this));
+      */
+      this.gamePlay.addCellEnterListener((index) => this.onCellEnter(index));
+      this.gamePlay.addCellClickListener((index) => this.onCellClick(index));
+      this.gamePlay.addCellLeaveListener((index) => this.onCellLeave(index));
+    } else {
+      this.onNextLevelGame();
+    }
   }
 
   checkState() {
     console.log(this);
     if (this.state.teamUser.members.size === 0 || this.state.teamComputer.members.size === 0) {
       alert('новый уровень');
+      this.newLevel();
     }
   }
 
