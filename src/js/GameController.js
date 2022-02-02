@@ -15,6 +15,7 @@ export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
+    // this.state = new GameState();// позже статик применить&
   }
 
   getArrayPositions(array, positionNumber, team) {
@@ -38,16 +39,26 @@ export default class GameController {
     const arrayForComputer = generateArray(min + size - 2, max - 1, size);
     console.log('получили массив компа', arrayForComputer);
 
-    this.state.teamUser = generateTeam([Bowman, Swordsman, Magician],
-      this.state.level, this.state.characterCount);
-    this.state.teamComputer = generateTeam([Undead, Daemon, Vampire],
-      this.state.level, this.state.characterCount);
+    if (this.state.level === 1) {
+      this.state.teamUser = generateTeam([Bowman, Swordsman, Magician],
+        this.state.level, this.state.characterCount);
+      this.state.teamComputer = generateTeam([Undead, Daemon, Vampire],
+        this.state.level, this.state.characterCount);
+    } else {
+      this.state.teamUser.addAll(...generateTeam([Bowman, Swordsman, Magician],
+        this.state.level - 1, this.state.characterCount).members);
+      this.state.teamComputer.addAll(...generateTeam([Undead, Daemon, Vampire],
+        this.state.level, this.state.teamUser.members.size).members);
+    }
     // подумать, как для 2-4 уровня параметр максимума задать
 
-    console.log('генерируем team', this.state.teamUser, this.state.teamUser.size, this.state.teamComputer, this.state.teamComputer.size);
+    console.log('генерируем team', this.state.teamUser, this.state.teamUser.members.size,
+      this.state.teamComputer, this.state.teamComputer.members.size);
 
     const positionNumberUser = [];
     const positionNumberComp = [];
+
+    this.state.ArrayOfPositionCharacter = []; // обнуляем?
 
     this.getArrayPositions(arrayForUser, positionNumberUser, this.state.teamUser);
     this.getArrayPositions(arrayForComputer, positionNumberComp, this.state.teamComputer);
@@ -106,6 +117,7 @@ export default class GameController {
     const character = this.getCharacter(idx);
     return (this.state.activeTeam.toArray().find((char) => char === character.character))
     || undefined;
+    // return (this.state.activeTeam.toArray().find((char) => char === character.character));
   }
 
   async onCellClick(index) {
@@ -113,15 +125,16 @@ export default class GameController {
     console.log('this+index+актив команда click', this, index, this.state.activeTeam);
     // console.log(this.state.ArrayOfPositionCharacter[this.getCharacter(index)]);
 
-    if (this.state.activeCell !== -1 && this.state.activePlayer !== undefined
-      && this.isCharInTeam(this.state.activeCell) !== undefined) {
+    if (this.state.activeCell !== -1 && this.state.activePlayer !== undefined) {
+    // && this.isCharInTeam(this.state.activeCell) !== undefined) {
     // && this.isCharInTeam(index) !== undefined) {
     // && !this.getCharacter(index)) {
       //  {
-      this.gamePlay.deselectCell(this.state.activeCell, 'yellow');
+      // this.gamePlay.selectCell(this.state.activeCell, 'yellow');
+      this.gamePlay.deselectCell(this.state.activeCell);
     }
 
-    if (this.state.activeCell === -1) { // начало игры
+    if (this.state.activeCell === -1) { // начало игры или новый уровень
       // this.state.activeTeam = this.state.teamUser; вынести в начальные данные
       do {
         if (this.getCharacter(index)) {
@@ -157,18 +170,20 @@ export default class GameController {
         //  проверка возможна ли  атака&
         console.log('возможна атака');
         //  this.attack();
-        this.gamePlay.deselectCell(index);// снимаем красный пунктир заранее
+        this.gamePlay.deselectCell(index);// снимаем красный пунктир заранее,
         const personAttack = this.state.activePlayer;
         const target = this.getCharacter(index).character;
         const attack = this.getCharacter(index).position;
         console.log('командf противника', this.state.teamComputer);
         console.log('цель в команде противника', target);
-        const damage = Math.max(personAttack.attack - target.defence, personAttack.attack * 0.1);
+        const damage = Math.max(personAttack.attack - target.defence,
+          personAttack.attack * 0.1).toFixed();
         await this.gamePlay.showDamage(index, damage);
         console.log('атака прошла урон противнику:', damage);
         target.health -= damage;
         // this.gamePlay.deselectCell(index);
-        // this.gamePlay.selectCell(this.state.activeCell, 'yellow'); ???
+        this.gamePlay.selectCell(this.state.activeCell, 'yellow'); // ???
+
         this.gamePlay.setCursor(cursors.pointer);
         // урон критичный:
         if (target.health <= 0) {
@@ -189,7 +204,7 @@ export default class GameController {
         }
         */
         this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
-        this.gamePlay.selectCell(this.state.activeCell, 'yellow');
+        // this.gamePlay.selectCell(this.state.activeCell, 'yellow');???
         // end
         //  this.checkState();// проверка уровня и состояния игры
         this.transferComp();
@@ -226,7 +241,7 @@ export default class GameController {
       this.gamePlay.deselectCell(this.state.activeCell);
       this.state.activeCell = index;
       this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
-      // this.gamePlay.selectCell(index, 'yellow');
+      this.gamePlay.selectCell(index, 'yellow');
 
       //  и похоже задвоение см 168 строку
 
@@ -308,7 +323,6 @@ export default class GameController {
 
   onNewGame() {
     this.state = new GameState();
-
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
     this.initGameDraw();
     this.state.activeTeam = this.state.teamUser;
@@ -332,6 +346,7 @@ export default class GameController {
     this.state = this.stateService.load();
     // this.state = GameState.from(this.stateService.load());
     console.log('loading', this.stateService.load(), this.state);
+    console.log('loading пробуем извлечь', GameState.from(this.state), GameState.from(this.state));
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
     GamePlay.showMessage(`Level ${this.state.level}`);
@@ -506,7 +521,8 @@ export default class GameController {
       const target = this.getCharacter(attack).character;
       console.log('команда юзерс персон', this.state.teamUser);
       console.log('цель среди юзерс персон', target);
-      const damage = Math.max(personAttacker.attack - target.defence, personAttacker.attack * 0.1);
+      const damage = Math.max(personAttacker.attack - target.defence,
+        personAttacker.attack * 0.1).toFixed();
       await this.gamePlay.showDamage(attack, damage);
       console.log('атака прошла урон:', damage);
       target.health -= damage;
@@ -521,16 +537,18 @@ export default class GameController {
         console.log('команда юзера после удаления:', this.state.teamUser);
 
         if (attack === oldactive) { // снять выбор активного у юзера
-          this.gamePlay.deselectCell(this.state.activeCell);
+          this.gamePlay.deselectCell(oldactive);
           this.state.activeCell = -1;
-          this.activePlayer = undefined;
+          this.state.activePlayer = undefined;
           this.state.activeTeam = this.state.teamUser;
         }
         // после удаления команда юзера пуста
         this.checkState();
       }
       this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
-      // this.gamePlay.selectCell(this.state.activeCell, 'yellow');
+      if (this.state.activeCell !== -1) {
+        this.gamePlay.selectCell(oldactive, 'yellow');
+      }
       // this.checkState();// проверка уровня и состояния игры?????
       //  this.attack();
     } else {
@@ -568,45 +586,80 @@ export default class GameController {
 
   onNextLevelGame() {
     // this.state = new GameState();
+    if (this.state.level === 2) {
+      this.state.characterCount = 1;
+    }
+    if (this.state.level === 3) {
+      this.state.characterCount = 2;
+    }
+    if (this.state.level === 4) {
+      this.state.characterCount = 2;
+    }
+    this.state.activePlayer = undefined;
+    this.state.ArrayOfPositionCharacter = []; // обнуляем здесь или в this.initGameDraw();
+    this.state.activeCell = -1;
 
+    this.gamePlay.drawUi(themes[`level${this.state.level}`]);
+    this.initGameDraw();
+    this.state.activeTeam = this.state.teamUser;
+    this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
+    GamePlay.showMessage(`Level ${this.state.level}`);
+
+    // this.onNewGame();
+    /* аналог onNewGame
+    this.activeTeam = this.teamUser;
+    this.initGameDraw();
+    // this.state.activeTeam = this.state.teamUser;
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
     // this.initGameDraw();
     // this.state.activeTeam = this.state.teamUser;
-
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
     GamePlay.showMessage(`Level ${this.state.level}`);
+    */
   }
 
   newLevel() {
-    this.state.level += 1;
-    if (this.state.level > 4) {
+    // this.state.level += 1;
+    let string = '';
+    if (this.state.level === 4) {
       console.log('Игра окончена');
-      // заблокировать? снять обработчики?
-      this.gamePlay.addNewGameListener(() => this.onNewGame());
-      this.gamePlay.addSaveGameListener(() => this.onSaveGame());
-      this.gamePlay.addLoadGameListener(() => this.onLoadGame());
-      /*
-      this.gamePlay.addLoadGameListener(this.onLoadGame.bind(this));
-      */
-      this.gamePlay.addCellEnterListener((index) => this.onCellEnter(index));
-      this.gamePlay.addCellClickListener((index) => this.onCellClick(index));
-      this.gamePlay.addCellLeaveListener((index) => this.onCellLeave(index));
-    } else {
+      if (this.state.teamUser.members.size === 0) {
+        string += 'Игра окончена. Поражение!';
+      } else {
+        string += 'Победа!!!';
+      }
+      GamePlay.showMessage(`${string}\nКол-во набранных очков: ${this.scopeSum()}\n
+      Максимальное число очков: ${Math.max(...this.state.scope)}`);
+      // заблокировать как ? снять обработчики?
+      this.endGame();
+    } else if (this.state.level < 4 && this.state.teamUser.members.size !== 0) { // играем дальше
+      string = `Уровень ${this.state.level} пройден. Играем дальше!`;
+      GamePlay.showMessage(`${string}\nКол-во набранных очков: ${this.scopeSum()}\n
+      Максимальное число очков: ${Math.max(...this.state.scope)}`);
+      this.state.level += 1;
+      this.state.teamUser.members.forEach((char) => char.levelUp());
       this.onNextLevelGame();
+    } else {
+      string = 'Игра окончена. Поражение!';
+      GamePlay.showMessage(`${string}\nКол-во набранных очков: ${this.scopeSum()}\n
+      Максимальное число очков: ${Math.max(...this.state.scope)}`);
+      this.endGame();
     }
   }
 
   checkState() {
-    console.log(this);
     if (this.state.teamUser.members.size === 0 || this.state.teamComputer.members.size === 0) {
-      alert('новый уровень');
+      // alert('новый уровень/ или конец');
+      // this.gamePlay.deselectCell(this.state.activeCell);
       this.newLevel();
     }
   }
 
   checkAllow(array) {
     // console.log('массив до проверки и исключения', array);
-    array.splice(array.indexOf(this.state.activeCell), 1);
+    if (array.indexOf(this.state.activeCell) !== -1) {
+      array.splice(array.indexOf(this.state.activeCell), 1);
+    }
     this.state.ArrayOfPositionCharacter.forEach((character) => {
       if (array.includes(character.position)) {
         array.splice(array.indexOf(character.position), 1);
@@ -614,5 +667,26 @@ export default class GameController {
     });
     // console.log('массив после проверки и исключения', array);
     return array;
+  }
+
+  scopeSum() {
+    let sum = 0;
+    sum += this.state.teamUser.toArray().reduce((a, b) => a + b.health, 0);
+    this.state.scope.push(sum);
+    console.log('на уровне набрано очков:', sum);
+    return sum;
+  }
+
+  endGame() {
+    console.log(this);
+    this.gamePlay.cellClickListeners = [];
+    this.gamePlay.cellEnterListeners = [];
+    this.gamePlay.cellLeaveListeners = [];
+    this.gamePlay.newGameListeners = [];
+    this.gamePlay.saveGameListeners = [];
+    this.gamePlay.loadGameListeners = [];
+
+    this.state.ArrayOfPositionCharacter = [];
+    this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
   }
 }

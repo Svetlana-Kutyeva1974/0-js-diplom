@@ -37,11 +37,65 @@ export default class GameState {
     this.activePlayer = undefined;
     this.ArrayOfPositionCharacter = [];
     this.characterCount = 2;
-    this.scope = 0;
+    this.scope = [];
     this.scopeMax = 0;
     this.teamUser = new Team();
     this.teamComputer = new Team();
     this.activeCell = -1;
     this.activeTeam = this.teamUser;
+    // this.init(this.state);
+  }
+
+  init() {
+    GameState.from(this);
   }
 }
+
+/*
+   const {
+      health,
+      level,
+      activePlayer,
+      characterCount,
+      ArrayOfPositionCharacter,
+      scope,
+      scopeMax,
+      teamUser:
+      {
+        members: members1,
+      },
+      teamComputer:
+      {
+        members: members2,
+      },
+      activeCell,
+      activeTeam:
+      {
+        members: members3,
+      },
+    } = object;
+    // return object;
+    return {
+      health,
+      level,
+      activePlayer,
+      characterCount,
+      ArrayOfPositionCharacter,
+      scope,
+      scopeMax,
+      teamUser:
+      {
+        members: members1,
+      },
+      teamComputer:
+      {
+        members: members2,
+      },
+      activeCell,
+      activeTeam:
+      {
+        members: members3,
+      },
+    };
+  }
+*/
