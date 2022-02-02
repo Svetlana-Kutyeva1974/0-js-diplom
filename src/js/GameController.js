@@ -15,7 +15,7 @@ export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
-    // this.state = new GameState();// позже статик применить&
+    // this.state = new GameState();//
   }
 
   getArrayPositions(array, positionNumber, team) {
@@ -50,7 +50,7 @@ export default class GameController {
       this.state.teamComputer.addAll(...generateTeam([Undead, Daemon, Vampire],
         this.state.level, this.state.teamUser.members.size).members);
     }
-    // подумать, как для 2-4 уровня параметр максимума задать
+    //  для 2-4 уровня параметр максимума задать
 
     console.log('генерируем team', this.state.teamUser, this.state.teamUser.members.size,
       this.state.teamComputer, this.state.teamComputer.members.size);
@@ -77,9 +77,7 @@ export default class GameController {
     this.gamePlay.addNewGameListener(() => this.onNewGame());
     this.gamePlay.addSaveGameListener(() => this.onSaveGame());
     this.gamePlay.addLoadGameListener(() => this.onLoadGame());
-    /*
-    this.gamePlay.addLoadGameListener(this.onLoadGame.bind(this));
-    */
+
     this.gamePlay.addCellEnterListener((index) => this.onCellEnter(index));
     this.gamePlay.addCellClickListener((index) => this.onCellClick(index));
     this.gamePlay.addCellLeaveListener((index) => this.onCellLeave(index));
@@ -182,6 +180,7 @@ export default class GameController {
         console.log('атака прошла урон противнику:', damage);
         target.health -= damage;
         // this.gamePlay.deselectCell(index);
+
         this.gamePlay.selectCell(this.state.activeCell, 'yellow'); // ???
 
         this.gamePlay.setCursor(cursors.pointer);
@@ -197,12 +196,14 @@ export default class GameController {
           // this.gamePlay.deselectCell(this.gameState.selected);
           // this.gameState.selected = null;
           console.log('команда компа после удаления:', this.state.teamComputer);
+          // this.gamePlay.deselectCell(this.state.activeCell);// --------------
           this.checkState();// проверка уровня и состояния игры
         }
         /* else {
           this.gamePlay.selectCell(this.state.activeCell, 'yellow');
         }
         */
+
         this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
         // this.gamePlay.selectCell(this.state.activeCell, 'yellow');???
         // end
@@ -244,19 +245,7 @@ export default class GameController {
       this.gamePlay.selectCell(index, 'yellow');
 
       //  и похоже задвоение см 168 строку
-
-      // ---
-      // переход хода?
-      /*
-      if (this.state.activeTeam === this.state.teamUser) {
-        this.state.activeTeam = this.state.teamComp;
-        this.state.activeCell === -1;
-      } else {
-        this.state.activeTeam = this.state.teamUser;
-        this.state.activeCell === -1;
-      }
-      */
-      // переход хода?
+      // переход хода
       this.transferComp();
     } else if (!this.getCharacter(index)
     && !this.checkAllowPoints(index, this.state.activePlayer.distance)) {
@@ -332,7 +321,6 @@ export default class GameController {
   }
 
   onSaveGame() {
-    // console.log('this', this);
     this.stateService.save(this.state);
     console.log('saving', this.state);
     GamePlay.showMessage(`Please, wait, saving: Level ${this.state.level}`);
@@ -372,7 +360,6 @@ export default class GameController {
       topBorder.push(i);
       bottomBorder.push(b ** 2 - 1 - i);
     }
-    // console.log('границы', leftBorder, rightBorder, topBorder, bottomBorder);
 
     // столбец с числоv
     for (let n = 1; n <= charCharacter; n += 1) {
@@ -385,7 +372,6 @@ export default class GameController {
       } else {
         points.push(idx + (b * n));
         points.push(idx - (b * n));
-        // console.log('формируем', (idx + (b * n)), (idx - (b * n)));
       }
 
       if (!leftBorder.includes(idx - (n - 1))) {
@@ -395,7 +381,6 @@ export default class GameController {
         points.push(idx - (b * n + n));
         points.push(idx + (b * n - n));
 
-        // console.log('формируем left', (idx - n), (idx + (b * n - n)), (idx - (b * n + n)));
         for (let j = 1; j <= n - 1; j += 1) {
         // if (n <= char - 1){
           points.push(idx + (b - 1) * n - b * j);
@@ -528,12 +513,9 @@ export default class GameController {
       target.health -= damage;
       //  урон критичен
       if (target.health <= 0) {
-        // this.deleteChar(target.position);// удаляем в общем массиве
-        // this.deleteChar(attack);
         console.log(' удаляем этот элемент в позиционном массиве:', this.getCharIndex(attack));
-        this.deleteChar(this.getCharIndex(attack));
+        this.deleteChar(this.getCharIndex(attack));// удаляем в общем массиве
         this.state.teamUser.delete(target); //
-        // this.teamUser.delete(target.character);
         console.log('команда юзера после удаления:', this.state.teamUser);
 
         if (attack === oldactive) { // снять выбор активного у юзера
@@ -543,14 +525,14 @@ export default class GameController {
           this.state.activeTeam = this.state.teamUser;
         }
         // после удаления команда юзера пуста
-        this.checkState();
+        this.checkState();// проверка уровня и состояния игры
       }
       this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
+      /*
       if (this.state.activeCell !== -1) {
         this.gamePlay.selectCell(oldactive, 'yellow');
       }
-      // this.checkState();// проверка уровня и состояния игры?????
-      //  this.attack();
+      */
     } else {
       // GamePlay.showError('играет компьютер!Атака не возможна!!!');// делаем перемещение
       //
@@ -585,16 +567,20 @@ export default class GameController {
   }
 
   onNextLevelGame() {
-    // this.state = new GameState();
-    if (this.state.level === 2) {
-      this.state.characterCount = 1;
+    switch (this.state.level) {
+      case 2:
+        this.state.characterCount = 1;
+        break;
+      case 3:
+        this.state.characterCount = 2;
+        break;
+      case 4:
+        this.state.characterCount = 2;
+        break;
+      default:
+        break;
     }
-    if (this.state.level === 3) {
-      this.state.characterCount = 2;
-    }
-    if (this.state.level === 4) {
-      this.state.characterCount = 2;
-    }
+
     this.state.activePlayer = undefined;
     this.state.ArrayOfPositionCharacter = []; // обнуляем здесь или в this.initGameDraw();
     this.state.activeCell = -1;
@@ -604,18 +590,6 @@ export default class GameController {
     this.state.activeTeam = this.state.teamUser;
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
     GamePlay.showMessage(`Level ${this.state.level}`);
-
-    // this.onNewGame();
-    /* аналог onNewGame
-    this.activeTeam = this.teamUser;
-    this.initGameDraw();
-    // this.state.activeTeam = this.state.teamUser;
-    this.gamePlay.drawUi(themes[`level${this.state.level}`]);
-    // this.initGameDraw();
-    // this.state.activeTeam = this.state.teamUser;
-    this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
-    GamePlay.showMessage(`Level ${this.state.level}`);
-    */
   }
 
   newLevel() {
@@ -648,8 +622,8 @@ export default class GameController {
   }
 
   checkState() {
+    // 'новый уровень/ или конец'
     if (this.state.teamUser.members.size === 0 || this.state.teamComputer.members.size === 0) {
-      // alert('новый уровень/ или конец');
       // this.gamePlay.deselectCell(this.state.activeCell);
       this.newLevel();
     }
@@ -678,14 +652,16 @@ export default class GameController {
   }
 
   endGame() {
-    console.log(this);
+    this.container = null;
+    this.boardEl = null;
+    this.cells = [];
     this.gamePlay.cellClickListeners = [];
     this.gamePlay.cellEnterListeners = [];
     this.gamePlay.cellLeaveListeners = [];
     this.gamePlay.newGameListeners = [];
     this.gamePlay.saveGameListeners = [];
     this.gamePlay.loadGameListeners = [];
-
+    // this.gamePlay = new GamePlay();
     this.state.ArrayOfPositionCharacter = [];
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
   }
