@@ -45,10 +45,11 @@ export default class GameState {
     this.activeTeam = this.teamUser;
     // this.init(this.state);
   }
-
+/*
   init() {
     GameState.from(this);
   }
+  */
 }
 
 /*
