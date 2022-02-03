@@ -10,6 +10,7 @@ import themes from './themes.js';
 import GameState from './GameState.js';
 import GamePlay from './GamePlay.js';
 import cursors from './cursors.js';
+import Team from './Team.js';
 
 export default class GameController {
   constructor(gamePlay, stateService) {
@@ -331,11 +332,30 @@ export default class GameController {
 
   onLoadGame() {
     GamePlay.showMessage('Please, wait, loading...');
-    this.state = this.stateService.load();
-    // this.state = GameState.from(this.stateService.load());
-    console.log('loading', this.stateService.load(), this.state);
-    console.log('loading пробуем извлечь', GameState.from(this.state), GameState.from(this.state));
+    this.state = new GameState();
+    let loadStateObject = new GameState();
+    loadStateObject = this.stateService.load();
+    this.state = GameState.from(loadStateObject);
+    this.state.activeCell = loadStateObject.activeCell;
+    this.state.characterCount = loadStateObject.characterCount;
+    this.state.activePlayer = loadStateObject.activePlayer;
+
+    console.log('loading обьек+ this state', loadStateObject, this.state, this.state.health, this.state.activeCell);
+    console.log('\n', this.state.ArrayOfPositionCharacter, this.state.characterCount, this.state.activePlayer);
+    console.log('loading пробуем извлечь', this.state);
+
+    this.fillTeamsAfterLoad(GameState.from(loadStateObject).ArrayOfPositionCharacter);
+    console.log('команды такие:', this.state.teamComputer, this.state.teamUser);
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
+    // --
+    this.gamePlay.addNewGameListener(() => this.onNewGame());
+    this.gamePlay.addSaveGameListener(() => this.onSaveGame());
+    this.gamePlay.addLoadGameListener(() => this.onLoadGame());
+
+    this.gamePlay.addCellEnterListener((index) => this.onCellEnter(index));
+    this.gamePlay.addCellClickListener((index) => this.onCellClick(index));
+    this.gamePlay.addCellLeaveListener((index) => this.onCellLeave(index));
+    // --
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
     GamePlay.showMessage(`Level ${this.state.level}`);
 
@@ -649,6 +669,72 @@ export default class GameController {
     this.state.scope.push(sum);
     console.log('на уровне набрано очков:', sum);
     return sum;
+  }
+
+  fillTeamsAfterLoad(arrayLoad) {
+    this.state.teamUser = new Team();
+    this.state.teamComputer = new Team();
+    this.state.activeTeam = new Team();
+    this.state.ArrayOfPositionCharacter = [];
+    // this.state.ArrayOfPositionCharacter.forEach((char, i, arr) => {
+    arrayLoad.forEach((char, i, arr) => {
+      // let type = char.character.type[0].toUpperCase() + char.character.type.slice(1);
+      const types = char.character.type;
+      let Types;
+      console.log('pleer type:', types, char.character);
+      switch (types) {
+        case 'bowman':
+          Types = Bowman;
+          break;
+        case 'swordsman':
+          Types = Swordsman;
+          break;
+        case 'magician':
+          Types = Magician;
+          break;
+        case 'undead':
+          Types = Undead;
+          break;
+        case 'vampire':
+          Types = Vampire;
+          break;
+        case 'daemon':
+          Types = Daemon;
+          break;
+        default:
+          break;
+      }
+      const person = new Types(char.character.level);
+      person.type = char.character.type;
+      person.health = char.character.health;
+      person.attackDistance = char.character.attackDistance;
+      person.distance = char.character.distance;
+      person.attack = char.character.attack;
+      person.distance = char.character;
+      if (['bowman', 'swordsman', 'magician'].includes(char.character.type)) {
+        this.state.teamUser.add(person);
+
+        // arr.splice(i, 1, new PositionedCharacter(person, char.position));
+        console.log('pleer:', char.character, person, this.state.teamUser);
+        console.log('arr this state position:===', arr);
+      } else {
+        this.state.teamComputer.add(person);
+        // this.state.ArrayOfPositionCharacter.push(new PositionedCharacter(num, position));
+        // arr.splice(i, 1, { character: person, position: char.position });
+        // arr.splice(i, 1, new PositionedCharacter(person, char.position));
+      }
+      // arr.splice(i, 1, new PositionedCharacter(`${person}`, char.position));
+      this.state.ArrayOfPositionCharacter.push(new PositionedCharacter(person, char.position));
+      console.log('arr после замены this state position:===', this.state.ArrayOfPositionCharacter);
+    });
+
+    if (this.state.teamUser.toArray().includes(this.activePlayer)) {
+      this.state.activeTeam = this.state.teamUser;
+    } else {
+      this.state.activeTeam = this.state.teamComputer;
+    }
+    console.log('active team pleer:', this.state.activeTeam);
+    console.log('active this state position:===', this.state.ArrayOfPositionCharacter);
   }
 
   endGame() {

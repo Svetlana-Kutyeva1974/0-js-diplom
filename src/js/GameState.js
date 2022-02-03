@@ -9,7 +9,7 @@ export default class GameState {
       characterCount,
       ArrayOfPositionCharacter,
       scope,
-      scopeMax,
+      // scopeMax,
       teamUser,
       teamComputer,
       activeCell,
@@ -23,7 +23,7 @@ export default class GameState {
       characterCount,
       ArrayOfPositionCharacter,
       scope,
-      scopeMax,
+      // scopeMax,
       teamUser,
       teamComputer,
       activeCell,
@@ -38,7 +38,7 @@ export default class GameState {
     this.ArrayOfPositionCharacter = [];
     this.characterCount = 2;
     this.scope = [];
-    this.scopeMax = 0;
+    // this.scopeMax = 0;
     this.teamUser = new Team();
     this.teamComputer = new Team();
     this.activeCell = -1;
@@ -52,6 +52,7 @@ export default class GameState {
   */
 }
 
+// черновик-----------------------
 /*
    const {
       health,
@@ -76,6 +77,8 @@ export default class GameState {
       },
     } = object;
     // return object;
+    //teamUser = {};
+    //teamUser.members = members1;
     return {
       health,
       level,

@@ -19,7 +19,7 @@ test('Created Character class', () => {
 
 test('level health error', () => {
   expect(() => {
-    const result = new Bowman(1);
+    const result = new Bowman(1, 'bowman');
     result.health = 0;
     result.levelUp();
   }).toThrow(/Нельзя повысить уровень умершего/);
