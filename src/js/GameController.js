@@ -182,9 +182,9 @@ export default class GameController {
         target.health -= damage;
         // this.gamePlay.deselectCell(index);
 
-        this.gamePlay.selectCell(this.state.activeCell, 'yellow'); // ???
-
+        // this.gamePlay.selectCell(this.state.activeCell, 'yellow'); // ???
         this.gamePlay.setCursor(cursors.pointer);
+
         // урон критичный:
         if (target.health <= 0) {
           // this.deleteChar(target.position);// изменить
@@ -409,7 +409,6 @@ export default class GameController {
         points.push(idx + (b * n - n));
 
         for (let j = 1; j <= n - 1; j += 1) {
-        // if (n <= char - 1){
           points.push(idx + (b - 1) * n - b * j);
           points.push(idx - (b + 1) * n + b * j);
 
@@ -444,7 +443,6 @@ export default class GameController {
         points.push(idx + (b * n + n));
 
         for (let j = 1; j <= n - 1; j += 1) {
-        // if (n <= char - 1) {
           points.push(idx - (b - 1) * n + b * j);
           points.push(idx + (b + 1) * n - b * j);
           points.push(idx - (b - 1) * n - j);
@@ -556,8 +554,7 @@ export default class GameController {
           this.state.activeTeam = this.state.teamUser;
         }
 
-        // после удаления команда юзера пуста
-        this.checkState();// проверка уровня и состояния игры
+        this.checkState();// проверка уровня и состояния игры при удалении
       }
       this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
       /*
@@ -592,10 +589,9 @@ export default class GameController {
     if (this.state.activeCell !== -1) {
       this.state.activeCell = oldactive;
       this.state.activePlayer = oldPlayer;
+      this.gamePlay.selectCell(oldactive, 'yellow');// --
     }
-    // this.gamePlay.selectCell(this.state.activeCell, 'yellow');
-    // return { character, position };
-    //
+    // this.gamePlay.selectCell(this.state.activeCell, 'yellow');/
   }
 
   onNextLevelGame() {
@@ -764,14 +760,3 @@ export default class GameController {
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
   }
 }
-
-//-----------------
-/*
-    this.state.activePlayer.type = loadStateObject.activePlayer.type;
-    this.state.activePlayer.health = loadStateObject.activePlayer.health;
-    this.state.activePlayer.attackDistance = loadStateObject.activePlayer.attackDistance;
-    this.state.activePlayer.distance = loadStateObject.activePlayer.distance;
-    this.state.activePlayer.attack = loadStateObject.activePlayer.attack;
-    this.state.activePlayer.defence = loadStateObject.activePlayer.defence;
-    this.state.activePlayer.level = loadStateObject.activePlayer.level;
- */
