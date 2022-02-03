@@ -53,7 +53,7 @@ export function generateTeam(allowedTypes, maxLevel = 1, characterCount = 2) {
 
 export function generateArray(start, end, step = 8) {
   const array = [];
-  const forArray = generateFromSequence(start, end, step);
+  const forArray = generateFromSequence(start, end - 1, step); //
   for (const value of forArray) {
     console.log('генерируем массив', value);
     array.push(value);

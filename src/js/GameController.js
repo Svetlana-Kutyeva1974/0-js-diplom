@@ -116,7 +116,6 @@ export default class GameController {
     const character = this.getCharacter(idx);
     return (this.state.activeTeam.toArray().find((char) => char === character.character))
     || undefined;
-    // return (this.state.activeTeam.toArray().find((char) => char === character.character));
   }
 
   async onCellClick(index) {
@@ -154,7 +153,6 @@ export default class GameController {
     // выбор игрока сделан
     } else if (this.getCharacter(index)) { // игра идет
       // если продолжение игры и выбран некий персонаж
-      // console.log('продолжаем игру');
 
       if (this.isCharInTeam(index)) { // персонаж команды активного игрока
         this.gamePlay.setCursor(cursors.pointer);
@@ -180,7 +178,6 @@ export default class GameController {
         await this.gamePlay.showDamage(index, damage);
         console.log('атака прошла урон противнику:', damage);
         target.health -= damage;
-        // this.gamePlay.deselectCell(index);
 
         // this.gamePlay.selectCell(this.state.activeCell, 'yellow'); // ???
         this.gamePlay.setCursor(cursors.pointer);
@@ -340,6 +337,8 @@ export default class GameController {
     this.state = new GameState();
     let loadStateObject = new GameState();
     loadStateObject = this.stateService.load();
+    this.state = loadStateObject;
+
     this.state = GameState.from(loadStateObject);
     this.state.activeCell = loadStateObject.activeCell;
     this.state.characterCount = loadStateObject.characterCount;
@@ -685,6 +684,7 @@ export default class GameController {
     this.state.activeTeam = new Team();
     this.state.ArrayOfPositionCharacter = [];
     // this.state.ArrayOfPositionCharacter.forEach((char, i, arr) => {
+    console.log('работаем с массивом загрузки:===', arrayLoad);
     arrayLoad.forEach((char, i, arr) => {
       // let type = char.character.type[0].toUpperCase() + char.character.type.slice(1);
       const types = char.character.type;
