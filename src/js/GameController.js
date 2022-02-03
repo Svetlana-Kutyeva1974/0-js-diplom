@@ -154,7 +154,7 @@ export default class GameController {
     // выбор игрока сделан
     } else if (this.getCharacter(index)) { // игра идет
       // если продолжение игры и выбран некий персонаж
-      console.log('продолжаем игру');
+      // console.log('продолжаем игру');
 
       if (this.isCharInTeam(index)) { // персонаж команды активного игрока
         this.gamePlay.setCursor(cursors.pointer);
@@ -300,6 +300,11 @@ export default class GameController {
     // this.gamePlay.setCursor(cursors.pointer);
     if (this.getCharacter(index)) { // eсть персонаж
       this.gamePlay.hideCellTooltip(index);
+      if (this.isCharInTeam(index) && this.isCharUser(index) === this.state.activePlayer
+        && this.state.teamUser.members.size !== 0) {
+        // eсть персонаж  и он персонаж активного юзера, то сохранить
+        this.gamePlay.selectCell(index, 'yellow');
+      }
     } else {
       this.gamePlay.deselectCell(index); // пустая клетка
       // this.gamePlay.setCursor(cursors.pointer);
@@ -339,6 +344,8 @@ export default class GameController {
     this.state.activeCell = loadStateObject.activeCell;
     this.state.characterCount = loadStateObject.characterCount;
     this.state.activePlayer = loadStateObject.activePlayer;
+    this.state.scope = loadStateObject.scope;
+    this.state.scopeMax = loadStateObject.scopeMax;
 
     console.log('loading обьек+ this state', loadStateObject, this.state, this.state.health, this.state.activeCell);
     console.log('\n', this.state.ArrayOfPositionCharacter, this.state.characterCount, this.state.activePlayer);
@@ -347,7 +354,7 @@ export default class GameController {
     this.fillTeamsAfterLoad(GameState.from(loadStateObject).ArrayOfPositionCharacter);
     console.log('команды такие:', this.state.teamComputer, this.state.teamUser);
     this.gamePlay.drawUi(themes[`level${this.state.level}`]);
-    // --
+    //--
     this.gamePlay.addNewGameListener(() => this.onNewGame());
     this.gamePlay.addSaveGameListener(() => this.onSaveGame());
     this.gamePlay.addLoadGameListener(() => this.onLoadGame());
@@ -355,7 +362,7 @@ export default class GameController {
     this.gamePlay.addCellEnterListener((index) => this.onCellEnter(index));
     this.gamePlay.addCellClickListener((index) => this.onCellClick(index));
     this.gamePlay.addCellLeaveListener((index) => this.onCellLeave(index));
-    // --
+    //--
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
     GamePlay.showMessage(`Level ${this.state.level}`);
 
@@ -531,6 +538,10 @@ export default class GameController {
       await this.gamePlay.showDamage(attack, damage);
       console.log('атака прошла урон:', damage);
       target.health -= damage;
+
+      if (attack === oldactive) {
+        this.gamePlay.selectCell(oldactive, 'yellow');// ---
+      }
       //  урон критичен
       if (target.health <= 0) {
         console.log(' удаляем этот элемент в позиционном массиве:', this.getCharIndex(attack));
@@ -544,6 +555,7 @@ export default class GameController {
           this.state.activePlayer = undefined;
           this.state.activeTeam = this.state.teamUser;
         }
+
         // после удаления команда юзера пуста
         this.checkState();// проверка уровня и состояния игры
       }
@@ -710,7 +722,7 @@ export default class GameController {
       person.attackDistance = char.character.attackDistance;
       person.distance = char.character.distance;
       person.attack = char.character.attack;
-      person.distance = char.character;
+      person.defence = char.character.defence;
       if (['bowman', 'swordsman', 'magician'].includes(char.character.type)) {
         this.state.teamUser.add(person);
 
@@ -752,3 +764,14 @@ export default class GameController {
     this.gamePlay.redrawPositions(this.state.ArrayOfPositionCharacter);
   }
 }
+
+//-----------------
+/*
+    this.state.activePlayer.type = loadStateObject.activePlayer.type;
+    this.state.activePlayer.health = loadStateObject.activePlayer.health;
+    this.state.activePlayer.attackDistance = loadStateObject.activePlayer.attackDistance;
+    this.state.activePlayer.distance = loadStateObject.activePlayer.distance;
+    this.state.activePlayer.attack = loadStateObject.activePlayer.attack;
+    this.state.activePlayer.defence = loadStateObject.activePlayer.defence;
+    this.state.activePlayer.level = loadStateObject.activePlayer.level;
+ */
